@@ -1,92 +1,172 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TELEFON-JANG | Xorazmcha Smartfon Maydoni</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TELEFON-JANG | Xorazmcha Arena</title>
+  <meta name="description" content="Telefonlar jangi: O'z apparatingni sayla va raqibni bopla! Xorazmcha jangona arena.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="text-slate-100 min-h-screen text-xs pb-16 selection:bg-amber-400 selection:text-black">
-
-  <!-- Bosh qismi (Header) -->
-  <header class="border-b border-amber-500/30 bg-slate-950/90 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-2.5">
-        <span class="text-3xl">🤼‍♂️</span>
-        <div>
-          <h1 class="text-base sm:text-lg font-black tracking-tight bg-gradient-to-r from-amber-400 via-rose-400 to-cyan-400 bg-clip-text text-transparent leading-none">
-            TELEFON-JANG • XORAZM POLVONLARI
-          </h1>
-          <span class="text-[10px] text-amber-200/90 font-bold">Qaysi biri g‘o‘lla polvon, qaysi biri nosqovoq — ringda bilasan, og‘a!</span>
-        </div>
-      </div>
-      <span class="text-[11px] text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-        Uzumdagi naqd so‘m bahosi
-      </span>
-    </div>
+<body>
+  <div class="bg-glow"></div>
+  
+  <header class="app-header">
+    <div class="badge">URGANCH KIBER-ARENA</div>
+    <h1>TELEFON-JANG</h1>
+    <p class="subtitle">Haqiqiy apparatingni sayla, xarakteristikasini bil va jangga kir!</p>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 pt-5 space-y-6">
-
-    <!-- Saylash va Qidirish joyi -->
-    <div class="panel rounded-2xl p-4 space-y-3 shadow-xl">
-      <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-        <div class="w-full sm:w-80">
-          <input 
-            type="text" 
-            id="search-input" 
-            placeholder="Qaysi telefon gark? Odini yoz (S25, Ayfon 16, Poco, A55)..." 
-            class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none transition shadow-inner"
-          />
-        </div>
-
-        <!-- Brend tugmalari -->
-        <div class="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-0.5 custom-scroll" id="brand-buttons">
-          <button data-brand="ALL" class="brand-btn px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-black shadow">Bari polvonlar (35+)</button>
-          <button data-brand="Samsung" class="brand-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold">Samsunglar</button>
-          <button data-brand="Apple" class="brand-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold">Ayfonlar (Olma)</button>
-          <button data-brand="Xiaomi" class="brand-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold">Redmi / Xiaomi</button>
-          <button data-brand="Poco" class="brand-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold">Poco (O‘yinbop)</button>
-          <button data-brand="Honor" class="brand-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold">Honor</button>
-          <button data-brand="Vivo" class="brand-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold">Vivo (Zeiss)</button>
-        </div>
-      </div>
-
-      <div class="flex justify-between items-center text-[11px] text-slate-400 pt-2 border-t border-slate-800">
-        <span id="catalog-count">Bozor rastasi to‘lib turibdi...</span>
-        <span id="ring-count" class="text-amber-300 font-extrabold bg-amber-500/10 px-2.5 py-0.5 rounded-md border border-amber-500/20">Ringda turganlar: 2 ta</span>
-      </div>
-    </div>
-
-    <!-- Telefonlar tokchasi -->
-    <div id="catalog-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
-
-    <!-- Ring maydoni -->
-    <div class="pt-2 space-y-4">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+  <main class="container">
+    <!-- 1-BOSQICH: APPARATNI SAYLASH -->
+    <section id="selection-phase" class="card">
+      <div class="section-title">
         <div>
-          <h3 class="text-base font-black text-amber-400 flex items-center gap-1.5 tracking-wide">
-            <span>🥊</span> POLVONLAR MAYDONI: YUZMA-YUZ URUSHTIRISH
-          </h3>
-          <p class="text-[11px] text-slate-400">Saylangan telefonlarning daxshat joyi, kamchiligi va nimaga bu ball olgani aniq ko‘rinadi:</p>
+          <h2>1. JANGCHI APPARATNI SAYLA</h2>
+          <span class="hint">Qidiruv yoki brendlar orqali tezda toping:</span>
         </div>
-
-        <button 
-          id="btn-fight"
-          class="bg-gradient-to-r from-red-600 via-rose-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black px-6 py-2.5 rounded-xl shadow-lg shadow-rose-600/30 transition active:scale-95 cursor-pointer text-xs flex items-center gap-1.5"
-        >
-          <span>🔥</span> SHULARI URUSHTIR (QAYSI BIRI YENGADI?)
-        </button>
+        <div class="counter-badge" id="phones-counter">0 ta apparat</div>
       </div>
 
-      <div id="ring-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </div>
+      <div class="filter-bar">
+        <input type="text" id="search-box" placeholder="🔍 Model yoki protsessor nomi (masalan: S26, 17 Pro, Nokia, A19)..." autocomplete="off">
+        <div class="brand-chips" id="brand-filters">
+          <button class="chip-btn active" data-brand="all">Hammasi</button>
+          <button class="chip-btn" data-brand="Apple">Apple</button>
+          <button class="chip-btn" data-brand="Samsung">Samsung</button>
+          <button class="chip-btn" data-brand="Xiaomi">Xiaomi</button>
+          <button class="chip-btn" data-brand="Google">Google</button>
+          <button class="chip-btn" data-brand="Nokia">Nokia</button>
+          <button class="chip-btn" data-brand="Nubia">RedMagic</button>
+        </div>
+      </div>
 
-    <!-- Jang Natijasi -->
-    <div id="fight-result" class="hidden panel border-2 border-amber-400/80 rounded-2xl p-5 shadow-2xl space-y-4"></div>
+      <!-- Ixcham gorizontal ro'yxat -->
+      <div id="phone-grid" class="phone-compact-grid"></div>
+
+      <!-- Pastki boshqaruv paneli -->
+      <div class="start-bar">
+        <div id="selected-summary">
+          <span>Hali apparat tanlanmadi. Ro'yxatdan o'zingizga yoqqanini bosing!</span>
+        </div>
+        <div class="start-actions">
+          <button id="btn-show-details" class="btn btn-secondary hidden">Xarakteristika 📋</button>
+          <button id="btn-fight-start" class="btn btn-primary" disabled>JANGNI BOSHLASH 🔥</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2-BOSQICH: JANG MAYDONI -->
+    <section id="battle-phase" class="card hidden">
+      <div class="arena-header">
+        <div class="vs-banner">💥 ARENA: KATTA TO'QNASHUV</div>
+        <button id="btn-change-phone" class="btn-link">← Boshqa apparat saylash</button>
+      </div>
+
+      <div class="battlefield" id="battle-arena">
+        <!-- O'yinchi -->
+        <div class="fighter-box player" id="player-box">
+          <div class="fighter-role">SENING APPARATING</div>
+          <h3 id="player-name" class="fighter-name">-</h3>
+          <div class="chip-badge" id="player-chip">-</div>
+          
+          <!-- Jon / Batareya -->
+          <div class="stat-wrapper">
+            <div class="stat-info">
+              <span>🔋 Zaryad (HP):</span>
+              <span id="player-hp-text">0/0</span>
+            </div>
+            <div class="stat-track">
+              <div id="player-hp-bar" class="stat-fill hp-player"></div>
+            </div>
+          </div>
+
+          <!-- Ulta / Energiya -->
+          <div class="stat-wrapper">
+            <div class="stat-info">
+              <span>⚡ Quvvat (Ulta):</span>
+              <span id="player-energy-text">0%</span>
+            </div>
+            <div class="stat-track">
+              <div id="player-energy-bar" class="stat-fill energy-fill"></div>
+            </div>
+          </div>
+
+          <div class="specs-mini">
+            <span>⚡ Zarb: <b id="player-attack">0</b></span>
+            <span>🛡 Himoya: <b id="player-defense">0</b></span>
+            <span>🚀 Tezlik: <b id="player-speed">0</b></span>
+          </div>
+        </div>
+
+        <div class="vs-divider">VS</div>
+
+        <!-- Raqib -->
+        <div class="fighter-box enemy" id="enemy-box">
+          <div class="fighter-role">RAQIB APPARAT</div>
+          <h3 id="enemy-name" class="fighter-name">-</h3>
+          <div class="chip-badge" id="enemy-chip">-</div>
+          
+          <div class="stat-wrapper">
+            <div class="stat-info">
+              <span>🔋 Zaryad (HP):</span>
+              <span id="enemy-hp-text">0/0</span>
+            </div>
+            <div class="stat-track">
+              <div id="enemy-hp-bar" class="stat-fill hp-enemy"></div>
+            </div>
+          </div>
+
+          <div class="stat-wrapper">
+            <div class="stat-info">
+              <span>⚡ Quvvat (Ulta):</span>
+              <span id="enemy-energy-text">0%</span>
+            </div>
+            <div class="stat-track">
+              <div id="enemy-energy-bar" class="stat-fill energy-fill"></div>
+            </div>
+          </div>
+
+          <div class="specs-mini">
+            <span>⚡ Zarb: <b id="enemy-attack">0</b></span>
+            <span>🛡 Himoya: <b id="enemy-defense">0</b></span>
+            <span>🚀 Tezlik: <b id="enemy-speed">0</b></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jang harakatlari -->
+      <div class="actions-panel">
+        <button id="btn-attack" class="btn btn-attack">💥 GULLATIB URISH</button>
+        <button id="btn-crit" class="btn btn-crit">🚀 BENCHMARK TESTI</button>
+        <button id="btn-charge" class="btn btn-charge">🔌 PAYNETDAN PUL SOLISH (+HP)</button>
+        <button id="btn-ulta" class="btn btn-ulta" disabled>🔥 TARAS-QARS ULTA (100%)</button>
+      </div>
+
+      <!-- Jang Sharhi -->
+      <div class="commentary-box">
+        <div class="commentary-header">Maydon diktori:</div>
+        <p id="commentary-text">Maydon qizimoqda! Birinchi zarbani ber, og'a!</p>
+      </div>
+    </section>
   </main>
+
+  <!-- APPARAT PASPORTI (MODAL OYNA) -->
+  <div id="modal-details" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Apparat Tafsilotlari</h3>
+        <button id="modal-close" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>TELEFON-JANG &copy; 2026 | Urganch kiber-klubi loyihasi</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>

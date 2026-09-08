@@ -1,221 +1,348 @@
-const state = {
-  phones: [],
-  selectedIds: ["s25u", "ip16pm"],
-  activeBrand: "ALL",
-  searchQuery: ""
+let allPhones = [];
+let filteredPhones = [];
+let player = null;
+let enemy = null;
+let isBattleOver = false;
+
+let selectedBrand = "all";
+let searchQuery = "";
+
+// Xorazmcha iboralar
+const xorazmPhrases = {
+  attack: [
+    "Apparat bilan to'g'ri manglayidan urding!",
+    "Bunday zarb bilan quvvatini sug'urib olding!",
+    "Gullatding og'a! Ekraniga yoriq tushgandek bo'ldi!"
+  ],
+  enemyAttack: [
+    "Voy dodingni bersin! Raqibing qattiq keldi!",
+    "Apparating qizib ketti, batareyang shuvillab ketmoqda!",
+    "Ehtiyot bo'l og'a, dushman shafqatsiz kelmoqda!"
+  ],
+  critSuccess: [
+    "DAHXAT! 120 FPS Benchmark kuchi bilan portlatding!",
+    "Barcha yadrolari baravar urib, raqibni qotirib qo'ydi!"
+  ],
+  critFail: [
+    "Attang! Protsessor qizib trottling bo'ldi, zarbing o'tmadi!",
+    "Ekran qotib qoldi, zarba havoga ketdi og'a!"
+  ],
+  charge: [
+    "Paynetdan hisobingga pul tushdi! Zaryad to'ldi!",
+    "Original zaryadchik ulanding, apparating yashnab ketti!"
+  ],
+  ultaSuccess: [
+    "TARAS-QARS! Butun kuchlanishni bitta zarbga jamlading, raqib tutab ketti!",
+    "Super-zarba! Urganch shamoliday uchirib yubordi!"
+  ],
+  win: "G'ALABA! Raqibning batareyi nol bo'ldi, maydon seniki bo'ldi og'a! 🏆",
+  lose: "MAG'LUBIYAT! Apparating o'chdi, ustaga olib borish kerak endi... 💀"
 };
 
-const elements = {
-  searchInput: document.getElementById("search-input"),
-  catalogGrid: document.getElementById("catalog-grid"),
-  catalogCount: document.getElementById("catalog-count"),
-  ringCount: document.getElementById("ring-count"),
-  ringCards: document.getElementById("ring-cards"),
-  btnFight: document.getElementById("btn-fight"),
-  fightResult: document.getElementById("fight-result"),
-  brandButtons: document.querySelectorAll(".brand-btn")
-};
-
-async function fetchPhones() {
+// 1. Dasturni ishga tushirish
+async function init() {
   try {
-    const res = await fetch("/api/phones");
-    if (!res.ok) throw new Error("Serverdan javob kelmadi");
-    const data = await res.json();
-    state.phones = data.phones;
-    render();
+    const res = await fetch("/phones.json");
+    allPhones = await res.json();
+    filteredPhones = [...allPhones];
+    updateCounter();
+    renderList();
+    bindEvents();
   } catch (err) {
-    elements.catalogCount.innerText = "Ma’lumotlarni yuklashda xatolik yuz berdi!";
+    document.getElementById("phone-grid").innerHTML = "<p>Telefonlar bazasi yuklanmadi.</p>";
   }
 }
 
-function render() {
-  renderCatalog();
-  renderRing();
+function updateCounter() {
+  document.getElementById("phones-counter").innerText = `${filteredPhones.length} ta apparat`;
 }
 
-function renderCatalog() {
-  const filtered = state.phones.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-                        p.brand.toLowerCase().includes(state.searchQuery.toLowerCase());
-    const matchBrand = state.activeBrand === "ALL" || 
-                       p.brand.toLowerCase() === state.activeBrand.toLowerCase();
-    return matchSearch && matchBrand;
+// 2. Qidiruv va brend filtrlari
+function bindEvents() {
+  const searchInput = document.getElementById("search-box");
+  searchInput.addEventListener("input", (e) => {
+    searchQuery = e.target.value.toLowerCase().trim();
+    applyFilter();
   });
 
-  elements.catalogCount.innerText = `Bozorda ${filtered.length} ta model ko‘rsatilmoqda`;
-
-  elements.catalogGrid.innerHTML = filtered.map(phone => {
-    const isSelected = state.selectedIds.includes(phone.id);
-    return `
-      <div 
-        onclick="togglePhoneSelection('${phone.id}')"
-        class="panel rounded-xl p-3 cursor-pointer transition flex flex-col justify-between hover:border-cyan-500/50 ${isSelected ? 'active-card' : ''}"
-      >
-        <div>
-          <div class="flex justify-between items-center mb-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">${phone.brand}</span>
-            <span class="text-[10px] text-slate-500 font-mono">${phone.amazon_price}</span>
-          </div>
-          <h4 class="font-bold text-xs text-slate-100 line-clamp-1 leading-snug">${phone.name}</h4>
-        </div>
-
-        <div class="mt-3 pt-2 border-t border-slate-800 flex justify-between items-center">
-          <span class="text-[11px] font-mono font-bold text-emerald-400">${phone.uzum_price}</span>
-          <span class="text-[10px] font-extrabold px-2 py-0.5 rounded ${isSelected ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-800 text-slate-300'}">
-            ${isSelected ? '✓ Saylangan' : '+ Sol'}
-          </span>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  elements.ringCount.innerText = `Ringda: ${state.selectedIds.length} ta telefon`;
-}
-
-function renderRing() {
-  const selectedPhones = state.phones.filter(p => state.selectedIds.includes(p.id));
-
-  elements.ringCards.innerHTML = selectedPhones.map((phone, idx) => `
-    <div class="panel rounded-2xl p-4 relative flex flex-col justify-between border-slate-800 shadow-xl">
-      <button 
-        onclick="togglePhoneSelection('${phone.id}')"
-        class="absolute top-3 right-3 text-[10px] font-bold bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white px-2 py-0.5 rounded-full border border-rose-500/20 transition"
-      >
-        ✕ Chiqar
-      </button>
-
-      <div>
-        <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 inline-block mb-1.5">
-          #${idx + 1} Burchak: ${phone.brand}
-        </span>
-
-        <h3 class="text-sm font-black text-slate-100 mb-2">${phone.name}</h3>
-
-        <!-- Narxlar -->
-        <div class="bg-slate-950/80 rounded-xl p-2.5 border border-slate-800 mb-3 space-y-1">
-          <div class="flex justify-between items-center">
-            <span class="text-slate-400">🛒 Uzum Market:</span>
-            <span class="font-bold text-emerald-400 font-mono text-xs">${phone.uzum_price}</span>
-          </div>
-          <div class="flex justify-between items-center text-[10px]">
-            <span class="text-slate-500">📦 Amazon / Xalqaro:</span>
-            <span class="text-slate-300 font-mono">${phone.amazon_price}</span>
-          </div>
-        </div>
-
-        <!-- Parametrlar -->
-        <div class="text-[11px] space-y-1 text-slate-300 mb-3 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
-          <div><span class="text-slate-500">🖥️ Ekran:</span> ${phone.screen}</div>
-          <div><span class="text-slate-500">⚡ Chip:</span> ${phone.cpu}</div>
-          <div><span class="text-slate-500">📸 Kamera:</span> ${phone.camera}</div>
-          <div><span class="text-slate-500">🔋 Batareya:</span> ${phone.battery}</div>
-          <div><span class="text-slate-500">⚖️ Og‘irligi:</span> ${phone.weight}</div>
-        </div>
-
-        <!-- Ballar va NIMA UCHUN berilgani -->
-        <div class="mb-3 bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 space-y-1.5 text-[10px]">
-          <span class="font-bold text-amber-400 uppercase tracking-wider block">📊 Nega bu ball berildi? (Asoslar):</span>
-          <div class="text-slate-300">⚡ <strong class="text-cyan-300">Chip (${phone.scores.cpu}/100):</strong> ${phone.score_reasons.cpu}</div>
-          <div class="text-slate-300">📸 <strong class="text-amber-300">Kamera (${phone.scores.camera}/100):</strong> ${phone.score_reasons.camera}</div>
-          <div class="text-slate-300">🔋 <strong class="text-emerald-300">Batareya (${phone.scores.battery}/100):</strong> ${phone.score_reasons.battery}</div>
-          <div class="text-slate-300">🖥️ <strong class="text-purple-300">Ekran (${phone.scores.screen}/100):</strong> ${phone.score_reasons.screen}</div>
-        </div>
-
-        <!-- Plyus va Minus -->
-        <div class="space-y-1.5 text-[11px]">
-          <div>
-            <span class="font-bold text-emerald-400">✅ Zo‘r tarafi:</span>
-            <span class="text-slate-300">${phone.pros.join(', ')}.</span>
-          </div>
-          <div>
-            <span class="font-bold text-rose-400">⚠️ Chala tarafi:</span>
-            <span class="text-slate-400">${phone.cons.join(', ')}.</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  `).join("");
-}
-
-window.togglePhoneSelection = function(id) {
-  if (state.selectedIds.includes(id)) {
-    if (state.selectedIds.length <= 1) {
-      alert("Kamida bitta telefon ringda tursin, jo‘ra!");
-      return;
-    }
-    state.selectedIds = state.selectedIds.filter(item => item !== id);
-  } else {
-    state.selectedIds.push(id);
-  }
-  render();
-};
-
-elements.searchInput.addEventListener("input", (e) => {
-  state.searchQuery = e.target.value.trim();
-  renderCatalog();
-});
-
-elements.brandButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    state.activeBrand = btn.dataset.brand;
-    elements.brandButtons.forEach(b => {
-      b.classList.remove("bg-amber-400", "text-slate-950", "font-black", "shadow");
-      b.classList.add("bg-slate-800", "text-slate-300", "font-semibold");
+  const chips = document.querySelectorAll(".chip-btn");
+  chips.forEach(btn => {
+    btn.addEventListener("click", () => {
+      chips.forEach(c => c.classList.remove("active"));
+      btn.classList.add("active");
+      selectedBrand = btn.dataset.brand;
+      applyFilter();
     });
-    btn.classList.remove("bg-slate-800", "text-slate-300", "font-semibold");
-    btn.classList.add("bg-amber-400", "text-slate-950", "font-black", "shadow");
-    renderCatalog();
   });
-});
 
-elements.btnFight.addEventListener("click", async () => {
-  if (state.selectedIds.length < 2) {
-    alert("Urush boshlash uchun kamida 2 ta telefon saylang, jo‘ra!");
+  // Modal oynani yopish
+  document.getElementById("modal-close").onclick = () => {
+    document.getElementById("modal-details").classList.add("hidden");
+  };
+  document.getElementById("modal-details").onclick = (e) => {
+    if (e.target.id === "modal-details") {
+      document.getElementById("modal-details").classList.add("hidden");
+    }
+  };
+
+  // Tafsilot tugmasi
+  document.getElementById("btn-show-details").onclick = () => {
+    if (player) openDetailsModal(player);
+  };
+}
+
+function applyFilter() {
+  filteredPhones = allPhones.filter(p => {
+    const matchesBrand = selectedBrand === "all" || p.brand.toLowerCase() === selectedBrand.toLowerCase();
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery) || 
+                          p.chipset.toLowerCase().includes(searchQuery);
+    return matchesBrand && matchesSearch;
+  });
+  updateCounter();
+  renderList();
+}
+
+// 3. Ixcham ro'yxatni chiqarish
+function renderList() {
+  const container = document.getElementById("phone-grid");
+  container.innerHTML = "";
+
+  if (filteredPhones.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 1.5rem;">Hech qanday apparat topilmadi.</div>`;
     return;
   }
 
-  try {
-    const res = await fetch("/api/fight", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone_ids: state.selectedIds })
-    });
+  filteredPhones.forEach(p => {
+    const item = document.createElement("div");
+    item.className = "phone-item";
+    if (player && player.id === p.id) item.classList.add("selected");
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Jang xatoligi");
+    item.onclick = () => selectPhone(p);
 
-    elements.fightResult.classList.remove("hidden");
-    elements.fightResult.scrollIntoView({ behavior: "smooth" });
-
-    elements.fightResult.innerHTML = `
-      <div class="text-center max-w-xl mx-auto">
-        <span class="text-4xl inline-block mb-1 animate-bounce">🏆</span>
-        <h4 class="text-xs font-black uppercase tracking-widest text-amber-400">XORAZM RINGI CHEMPIONI</h4>
-        <h3 class="text-xl sm:text-2xl font-black text-slate-100 uppercase mt-0.5 mb-2">
-          ${data.winner.name} YUTDI!
-        </h3>
-        <p class="text-slate-300 text-xs leading-relaxed bg-slate-950/80 p-3.5 rounded-xl border border-amber-500/30">
-          ${data.xorazmcha_xulosa}
-        </p>
+    item.innerHTML = `
+      <div class="phone-item-head">
+        <span class="brand">${p.brand}</span>
+        <span class="price">${p.price}</span>
       </div>
-
-      <div class="border-t border-slate-800 pt-3">
-        <h5 class="text-center text-[11px] font-bold text-slate-400 mb-2 uppercase">Umumiy ballar jamg‘armasi:</h5>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          ${data.standings.map((st, i) => `
-            <div class="p-2.5 rounded-xl border ${i === 0 ? 'border-amber-400 bg-amber-500/10' : 'border-slate-800 bg-slate-950'} flex justify-between items-center">
-              <span class="text-xs font-bold ${i === 0 ? 'text-amber-400' : 'text-slate-300'}">
-                #${i + 1} ${st.phone.name}
-              </span>
-              <span class="text-xs font-mono font-bold text-cyan-400">${st.total_score} ball</span>
-            </div>
-          `).join("")}
-        </div>
+      <div class="phone-item-name" title="${p.name}">${p.name}</div>
+      <div class="phone-item-chip">${p.chipset}</div>
+      <div class="phone-item-stats">
+        <span>HP: <b>${p.hp}</b></span>
+        <span>Zarb: <b>${p.attack}</b></span>
+        <span>Himoya: <b>${p.defense}</b></span>
       </div>
     `;
-  } catch (err) {
-    alert(err.message);
-  }
-});
+    container.appendChild(item);
+  });
+}
 
-fetchPhones();
+// 4. Foydalanuvchi o'zi tanlaydi
+function selectPhone(p) {
+  player = JSON.parse(JSON.stringify(p));
+  player.energy = 0; // Ulta energiyasi
+
+  document.querySelectorAll(".phone-item").forEach(el => el.classList.remove("selected"));
+  renderList();
+
+  document.getElementById("selected-summary").innerHTML = `
+    Saylandi: <b style="color: var(--primary)">${player.name}</b> 
+    | HP: <b>${player.hp}</b> | Zarb: <b>${player.attack}</b>
+  `;
+  document.getElementById("btn-fight-start").disabled = false;
+  document.getElementById("btn-show-details").classList.remove("hidden");
+}
+
+// Tafsilotlar modalini ko'rsatish
+function openDetailsModal(phone) {
+  document.getElementById("modal-title").innerText = phone.name;
+  const body = document.getElementById("modal-body");
+  body.innerHTML = `
+    <div class="detail-row"><span>Brend:</span><b>${phone.brand}</b></div>
+    <div class="detail-row"><span>Narxi:</span><b>${phone.price}</b></div>
+    <div class="detail-row"><span>Protsessor:</span><b>${phone.chipset}</b></div>
+    <div class="detail-row"><span>Xotira & RAM:</span><b>${phone.ram} | ${phone.storage}</b></div>
+    <div class="detail-row"><span>Batareya & Zaryad:</span><b>${phone.battery} (${phone.charging})</b></div>
+    <div class="detail-row"><span>Kamera:</span><b>${phone.camera}</b></div>
+    <div class="detail-row"><span>Displey:</span><b>${phone.screen}</b></div>
+    <div class="detail-row"><span>Vazni & O'lchami:</span><b>${phone.weight || '-'} | ${phone.dimensions || '-'}</b></div>
+    <p style="font-size: 0.8rem; color: #cbd5e1; font-style: italic; margin-top: 0.8rem; line-height: 1.3;">
+      "${phone.vibe}"
+    </p>
+  `;
+  document.getElementById("modal-details").classList.remove("hidden");
+}
+
+// 5. Jangni boshlash
+document.getElementById("btn-fight-start").onclick = () => {
+  if (!player) return;
+
+  const remaining = allPhones.filter(p => p.id !== player.id);
+  const randomEnemy = remaining[Math.floor(Math.random() * remaining.length)] || allPhones[0];
+  enemy = JSON.parse(JSON.stringify(randomEnemy));
+  enemy.energy = 0;
+
+  isBattleOver = false;
+  document.getElementById("selection-phase").classList.add("hidden");
+  document.getElementById("battle-phase").classList.remove("hidden");
+
+  setupBattleUI();
+};
+
+document.getElementById("btn-change-phone").onclick = () => {
+  document.getElementById("battle-phase").classList.add("hidden");
+  document.getElementById("selection-phase").classList.remove("hidden");
+};
+
+// 6. Arena sozlamalari
+function setupBattleUI() {
+  document.getElementById("player-name").innerText = player.name;
+  document.getElementById("player-chip").innerText = player.chipset;
+  document.getElementById("player-attack").innerText = player.attack;
+  document.getElementById("player-defense").innerText = player.defense;
+  document.getElementById("player-speed").innerText = player.speed || 30;
+
+  document.getElementById("enemy-name").innerText = enemy.name;
+  document.getElementById("enemy-chip").innerText = enemy.chipset;
+  document.getElementById("enemy-attack").innerText = enemy.attack;
+  document.getElementById("enemy-defense").innerText = enemy.defense;
+  document.getElementById("enemy-speed").innerText = enemy.speed || 30;
+
+  updateStatsBars();
+  setCommentary(`Maydonga ${player.name} va ${enemy.name} tushdi! Birinchi zarbani ur, og'a!`);
+}
+
+function updateStatsBars() {
+  // HP
+  const pPercent = Math.max(0, (player.hp / player.max_hp) * 100);
+  const ePercent = Math.max(0, (enemy.hp / enemy.max_hp) * 100);
+  document.getElementById("player-hp-bar").style.width = pPercent + "%";
+  document.getElementById("player-hp-text").innerText = `${Math.max(0, player.hp)}/${player.max_hp}`;
+  document.getElementById("enemy-hp-bar").style.width = ePercent + "%";
+  document.getElementById("enemy-hp-text").innerText = `${Math.max(0, enemy.hp)}/${enemy.max_hp}`;
+
+  // Energiya (Ulta)
+  document.getElementById("player-energy-bar").style.width = player.energy + "%";
+  document.getElementById("player-energy-text").innerText = player.energy + "%";
+  document.getElementById("enemy-energy-bar").style.width = enemy.energy + "%";
+  document.getElementById("enemy-energy-text").innerText = enemy.energy + "%";
+
+  document.getElementById("btn-ulta").disabled = player.energy < 100;
+}
+
+function setCommentary(msg) {
+  document.getElementById("commentary-text").innerHTML = msg;
+}
+
+function triggerShake(targetId) {
+  const el = document.getElementById(targetId);
+  el.classList.add("hit-anim");
+  setTimeout(() => el.classList.remove("hit-anim"), 350);
+}
+
+// 7. Jang zarbalari
+document.getElementById("btn-attack").onclick = () => {
+  if (isBattleOver) return;
+
+  const dmg = Math.max(8, player.attack - Math.floor(enemy.defense / 3) + Math.floor(Math.random() * 8) - 4);
+  enemy.hp -= dmg;
+  player.energy = Math.min(100, player.energy + 25);
+  
+  triggerShake("enemy-box");
+  setCommentary(`💥 <b>${player.name}</b> zarba urdi (-${dmg} HP)! ${getRandom(xorazmPhrases.attack)}`);
+  updateStatsBars();
+
+  if (checkWinner()) return;
+  setTimeout(enemyTurn, 750);
+};
+
+document.getElementById("btn-crit").onclick = () => {
+  if (isBattleOver) return;
+
+  if (Math.random() > 0.4) {
+    const dmg = Math.floor(player.attack * 1.65) + Math.floor(Math.random() * 6);
+    enemy.hp -= dmg;
+    player.energy = Math.min(100, player.energy + 35);
+    triggerShake("enemy-box");
+    setCommentary(`⚡ <b>${player.name}</b> BENCHMARK zarba berdi (-${dmg} HP)! ${getRandom(xorazmPhrases.critSuccess)}`);
+  } else {
+    setCommentary(`⚠️ ${getRandom(xorazmPhrases.critFail)}`);
+  }
+  updateStatsBars();
+
+  if (checkWinner()) return;
+  setTimeout(enemyTurn, 750);
+};
+
+document.getElementById("btn-charge").onclick = () => {
+  if (isBattleOver) return;
+
+  const heal = Math.floor(player.max_hp * 0.28);
+  player.hp = Math.min(player.max_hp, player.hp + heal);
+  player.energy = Math.min(100, player.energy + 15);
+  setCommentary(`🔌 <b>${player.name}</b> quvvatlandi (+${heal} HP)! ${getRandom(xorazmPhrases.charge)}`);
+  updateStatsBars();
+
+  setTimeout(enemyTurn, 750);
+};
+
+// ULTA ZARBA
+document.getElementById("btn-ulta").onclick = () => {
+  if (isBattleOver || player.energy < 100) return;
+
+  const dmg = Math.floor(player.attack * 2.4);
+  enemy.hp -= dmg;
+  player.energy = 0;
+  triggerShake("enemy-box");
+  setCommentary(`🔥 <b>${player.name}</b> ULTA ISHLATDI (-${dmg} HP)! ${getRandom(xorazmPhrases.ultaSuccess)}`);
+  updateStatsBars();
+
+  if (checkWinner()) return;
+  setTimeout(enemyTurn, 750);
+};
+
+// Raqib navbati
+function enemyTurn() {
+  if (isBattleOver) return;
+
+  // Agar raqibda ulta to'lsa, ulta ishlatadi
+  if (enemy.energy >= 100) {
+    const dmg = Math.floor(enemy.attack * 2.2);
+    player.hp -= dmg;
+    enemy.energy = 0;
+    triggerShake("player-box");
+    setCommentary(`🚨 DAHSHAT! <b>${enemy.name}</b> SUPER-ULTA bilan urdi (-${dmg} HP)!`);
+  } else {
+    const dmg = Math.max(6, enemy.attack - Math.floor(player.defense / 3) + Math.floor(Math.random() * 6) - 3);
+    player.hp -= dmg;
+    enemy.energy = Math.min(100, enemy.energy + 30);
+    triggerShake("player-box");
+    setCommentary(`🚨 <b>${enemy.name}</b> senga zarba urdi (-${dmg} HP)! ${getRandom(xorazmPhrases.enemyAttack)}`);
+  }
+
+  updateStatsBars();
+  checkWinner();
+}
+
+function checkWinner() {
+  if (enemy.hp <= 0) {
+    enemy.hp = 0;
+    updateStatsBars();
+    isBattleOver = true;
+    setCommentary(`🏆 <b>${xorazmPhrases.win}</b>`);
+    return true;
+  }
+  if (player.hp <= 0) {
+    player.hp = 0;
+    updateStatsBars();
+    isBattleOver = true;
+    setCommentary(`💀 <b>${xorazmPhrases.lose}</b>`);
+    return true;
+  }
+  return false;
+}
+
+function getRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+init();
