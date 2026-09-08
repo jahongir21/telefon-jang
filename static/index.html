@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TELEFON-JANG | Xorazmcha Arena</title>
-  <meta name="description" content="Telefonlar jangi: O'z apparatingni sayla va raqibni bopla! Xorazmcha jangona arena.">
+  <title>TELEFON-JANG | Urganch Arena 1v1</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,26 +13,36 @@
   <div class="bg-glow"></div>
   
   <header class="app-header">
-    <div class="badge">URGANCH KIBER-ARENA</div>
+    <div class="badge">⚔️ URGANCH 1V1 ARENA</div>
     <h1>TELEFON-JANG</h1>
-    <p class="subtitle">Haqiqiy apparatingni sayla, xarakteristikasini bil va jangga kir!</p>
+    <p class="subtitle">Ikkita apparatni o'zingiz saylang: Haqiqiy xarakteristikalar to'qnashuvi!</p>
   </header>
 
   <main class="container">
-    <!-- 1-BOSQICH: APPARATNI SAYLASH -->
+    <!-- 1-BOSQICH: IKKITA TELEFONNI SAYLASH (MANUAL 1v1) -->
     <section id="selection-phase" class="card">
-      <div class="section-title">
-        <div>
-          <h2>1. JANGCHI APPARATNI SAYLA</h2>
-          <span class="hint">Qidiruv yoki brendlar orqali tezda toping:</span>
+      <div class="selection-slots">
+        <!-- 1-O'yinchi Slot -->
+        <div class="slot-card active-slot" id="slot-p1" onclick="setPickingSlot(1)">
+          <span class="slot-badge">1-ISHTIROKCHI</span>
+          <h3 id="slot-name-p1">Apparat saylang...</h3>
+          <p id="slot-specs-p1" class="slot-sub">Ro'yxatdan bosing</p>
         </div>
-        <div class="counter-badge" id="phones-counter">0 ta apparat</div>
+
+        <div class="slot-vs">VS</div>
+
+        <!-- 2-O'yinchi Slot -->
+        <div class="slot-card" id="slot-p2" onclick="setPickingSlot(2)">
+          <span class="slot-badge">2-ISHTIROKCHI</span>
+          <h3 id="slot-name-p2">Apparat saylang...</h3>
+          <p id="slot-specs-p2" class="slot-sub">Ro'yxatdan bosing</p>
+        </div>
       </div>
 
       <div class="filter-bar">
-        <input type="text" id="search-box" placeholder="🔍 Model yoki protsessor nomi (masalan: S26, 17 Pro, Nokia, A19)..." autocomplete="off">
+        <input type="text" id="search-box" placeholder="🔍 Model yoki chipsetni qidiring (masalan: 17 Pro Max, S26, 3310, Dimensity)..." autocomplete="off">
         <div class="brand-chips" id="brand-filters">
-          <button class="chip-btn active" data-brand="all">Hammasi</button>
+          <button class="chip-btn active" data-brand="all">Barchasi</button>
           <button class="chip-btn" data-brand="Apple">Apple</button>
           <button class="chip-btn" data-brand="Samsung">Samsung</button>
           <button class="chip-btn" data-brand="Xiaomi">Xiaomi</button>
@@ -43,129 +52,91 @@
         </div>
       </div>
 
-      <!-- Ixcham gorizontal ro'yxat -->
+      <!-- Ixcham Apparatlar Paneli -->
       <div id="phone-grid" class="phone-compact-grid"></div>
 
-      <!-- Pastki boshqaruv paneli -->
       <div class="start-bar">
-        <div id="selected-summary">
-          <span>Hali apparat tanlanmadi. Ro'yxatdan o'zingizga yoqqanini bosing!</span>
-        </div>
-        <div class="start-actions">
-          <button id="btn-show-details" class="btn btn-secondary hidden">Xarakteristika 📋</button>
-          <button id="btn-fight-start" class="btn btn-primary" disabled>JANGNI BOSHLASH 🔥</button>
-        </div>
+        <div id="selected-summary">1-ishtirokchi uchun apparat tanlang</div>
+        <button id="btn-fight-start" class="btn btn-primary" disabled>MAYDONGA TUSHISH 🔥</button>
       </div>
     </section>
 
-    <!-- 2-BOSQICH: JANG MAYDONI -->
+    <!-- 2-BOSQICH: JANG ARENASI -->
     <section id="battle-phase" class="card hidden">
       <div class="arena-header">
-        <div class="vs-banner">💥 ARENA: KATTA TO'QNASHUV</div>
+        <div class="turn-indicator" id="turn-indicator">Harakat: 1-Ishtirokchida</div>
         <button id="btn-change-phone" class="btn-link">← Boshqa apparat saylash</button>
       </div>
 
-      <div class="battlefield" id="battle-arena">
-        <!-- O'yinchi -->
-        <div class="fighter-box player" id="player-box">
-          <div class="fighter-role">SENING APPARATING</div>
-          <h3 id="player-name" class="fighter-name">-</h3>
-          <div class="chip-badge" id="player-chip">-</div>
+      <div class="battlefield">
+        <!-- 1-O'yinchi Apparat -->
+        <div class="fighter-box p1" id="p1-box">
+          <div class="fighter-role">1-APPARAT</div>
+          <h3 id="p1-name" class="fighter-name">-</h3>
+          <div class="chip-badge" id="p1-chip">-</div>
           
-          <!-- Jon / Batareya -->
           <div class="stat-wrapper">
-            <div class="stat-info">
-              <span>🔋 Zaryad (HP):</span>
-              <span id="player-hp-text">0/0</span>
-            </div>
-            <div class="stat-track">
-              <div id="player-hp-bar" class="stat-fill hp-player"></div>
-            </div>
+            <div class="stat-info"><span>🔋 Zaryad:</span><span id="p1-hp-text">0/0</span></div>
+            <div class="stat-track"><div id="p1-hp-bar" class="stat-fill hp-p1"></div></div>
           </div>
 
-          <!-- Ulta / Energiya -->
           <div class="stat-wrapper">
-            <div class="stat-info">
-              <span>⚡ Quvvat (Ulta):</span>
-              <span id="player-energy-text">0%</span>
-            </div>
-            <div class="stat-track">
-              <div id="player-energy-bar" class="stat-fill energy-fill"></div>
-            </div>
+            <div class="stat-info"><span>⚡ Quvvat (Ulta):</span><span id="p1-energy-text">0%</span></div>
+            <div class="stat-track"><div id="p1-energy-bar" class="stat-fill energy-fill"></div></div>
           </div>
 
-          <div class="specs-mini">
-            <span>⚡ Zarb: <b id="player-attack">0</b></span>
-            <span>🛡 Himoya: <b id="player-defense">0</b></span>
-            <span>🚀 Tezlik: <b id="player-speed">0</b></span>
+          <div class="specs-grid">
+            <div>⚡ Zarb: <b id="p1-attack">0</b></div>
+            <div>🛡 Himoya: <b id="p1-defense">0</b></div>
+            <div>🌡 Harorat: <b id="p1-temp">36°C</b></div>
+            <div>📷 Kamera: <b id="p1-cam">-</b></div>
           </div>
         </div>
 
-        <div class="vs-divider">VS</div>
-
-        <!-- Raqib -->
-        <div class="fighter-box enemy" id="enemy-box">
-          <div class="fighter-role">RAQIB APPARAT</div>
-          <h3 id="enemy-name" class="fighter-name">-</h3>
-          <div class="chip-badge" id="enemy-chip">-</div>
+        <!-- 2-O'yinchi Apparat -->
+        <div class="fighter-box p2" id="p2-box">
+          <div class="fighter-role">2-APPARAT</div>
+          <h3 id="p2-name" class="fighter-name">-</h3>
+          <div class="chip-badge" id="p2-chip">-</div>
           
           <div class="stat-wrapper">
-            <div class="stat-info">
-              <span>🔋 Zaryad (HP):</span>
-              <span id="enemy-hp-text">0/0</span>
-            </div>
-            <div class="stat-track">
-              <div id="enemy-hp-bar" class="stat-fill hp-enemy"></div>
-            </div>
+            <div class="stat-info"><span>🔋 Zaryad:</span><span id="p2-hp-text">0/0</span></div>
+            <div class="stat-track"><div id="p2-hp-bar" class="stat-fill hp-p2"></div></div>
           </div>
 
           <div class="stat-wrapper">
-            <div class="stat-info">
-              <span>⚡ Quvvat (Ulta):</span>
-              <span id="enemy-energy-text">0%</span>
-            </div>
-            <div class="stat-track">
-              <div id="enemy-energy-bar" class="stat-fill energy-fill"></div>
-            </div>
+            <div class="stat-info"><span>⚡ Quvvat (Ulta):</span><span id="p2-energy-text">0%</span></div>
+            <div class="stat-track"><div id="p2-energy-bar" class="stat-fill energy-fill"></div></div>
           </div>
 
-          <div class="specs-mini">
-            <span>⚡ Zarb: <b id="enemy-attack">0</b></span>
-            <span>🛡 Himoya: <b id="enemy-defense">0</b></span>
-            <span>🚀 Tezlik: <b id="enemy-speed">0</b></span>
+          <div class="specs-grid">
+            <div>⚡ Zarb: <b id="p2-attack">0</b></div>
+            <div>🛡 Himoya: <b id="p2-defense">0</b></div>
+            <div>🌡 Harorat: <b id="p2-temp">36°C</b></div>
+            <div>📷 Kamera: <b id="p2-cam">-</b></div>
           </div>
         </div>
       </div>
 
-      <!-- Jang harakatlari -->
+      <!-- Taktik Boshqaruv Tugmalari -->
       <div class="actions-panel">
         <button id="btn-attack" class="btn btn-attack">💥 GULLATIB URISH</button>
-        <button id="btn-crit" class="btn btn-crit">🚀 BENCHMARK TESTI</button>
+        <button id="btn-crit" class="btn btn-crit">🚀 OVERCLOCK (Kuchli zarb)</button>
+        <button id="btn-cool" class="btn btn-cool">❄️ KULER QO'YISH (Sovutish + Qalqon)</button>
         <button id="btn-charge" class="btn btn-charge">🔌 PAYNETDAN PUL SOLISH (+HP)</button>
         <button id="btn-ulta" class="btn btn-ulta" disabled>🔥 TARAS-QARS ULTA (100%)</button>
       </div>
 
-      <!-- Jang Sharhi -->
+      <!-- Sharh -->
       <div class="commentary-box">
-        <div class="commentary-header">Maydon diktori:</div>
-        <p id="commentary-text">Maydon qizimoqda! Birinchi zarbani ber, og'a!</p>
+        <div class="commentary-header">Arena ovozi:</div>
+        <p id="commentary-text">Maydon qizimoqda! 1-apparat, zarbani boshla og'a!</p>
       </div>
     </section>
   </main>
 
-  <!-- APPARAT PASPORTI (MODAL OYNA) -->
-  <div id="modal-details" class="modal-overlay hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="modal-title">Apparat Tafsilotlari</h3>
-        <button id="modal-close" class="modal-close-btn">&times;</button>
-      </div>
-      <div class="modal-body" id="modal-body"></div>
-    </div>
-  </div>
-
   <footer class="app-footer">
-    <p>TELEFON-JANG &copy; 2026 | Urganch kiber-klubi loyihasi</p>
+    <p>TELEFON-JANG &copy; 2026 | Urganch kiber-klubi</p>
   </footer>
 
   <script src="script.js"></script>
