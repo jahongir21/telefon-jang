@@ -10,6 +10,10 @@ let pickingSlot = 1;
 let selectedBrand = "all";
 let searchQuery = "";
 
+// Jonli Dollar kursi (Standart: 12,900 so'm, API orqali yangilanadi)
+let usdToUzsRate = 12900;
+
+// Xorazmcha jonli dialoglar
 const xorazmPhrases = {
   attack: [
     "Apparat bilan to'g'ri manglayidan urdi!",
@@ -34,12 +38,41 @@ const xorazmPhrases = {
 };
 
 async function init() {
+  await fetchExchangeRate();
+  await loadPhonesData();
+  bindEvents();
+}
+
+// 1. O'zbekiston so'mi bo'yicha jonli kursni olish
+async function fetchExchangeRate() {
+  try {
+    const res = await fetch("https://open.er-api.com/v6/latest/USD");
+    const data = await res.json();
+    if (data && data.rates && data.rates.UZS) {
+      usdToUzsRate = Math.round(data.rates.UZS);
+      document.getElementById("usd-rate-badge").innerText = `1$ = ${usdToUzsRate.toLocaleString('uz-UZ')} so'm (Jonli)`;
+    }
+  } catch (e) {
+    document.getElementById("usd-rate-badge").innerText = `1$ = ${usdToUzsRate.toLocaleString('uz-UZ')} so'm (Oflayn)`;
+  }
+}
+
+// Dollarni so'mga o'girish
+function formatUzs(priceStr) {
+  if (!priceStr) return "Noma'lum";
+  const num = parseInt(priceStr.replace(/[^0-9]/g, ''));
+  if (isNaN(num)) return priceStr;
+  const uzs = num * usdToUzsRate;
+  return uzs.toLocaleString('uz-UZ') + " so'm";
+}
+
+// 2. Telefonlar bazasini yuklash
+async function loadPhonesData() {
   try {
     const res = await fetch("phones.json");
     allPhones = await res.json();
     filteredPhones = [...allPhones];
     renderList();
-    bindEvents();
   } catch (err) {
     document.getElementById("phone-grid").innerHTML = "<p>phones.json yuklanmadi!</p>";
   }
@@ -60,6 +93,7 @@ function bindEvents() {
     });
   });
 
+  document.getElementById("btn-compare-now").onclick = comparePhones;
   document.getElementById("btn-fight-start").onclick = startBattle;
   document.getElementById("btn-change-phone").onclick = resetToSelection;
   document.getElementById("btn-play-again").onclick = resetToSelection;
@@ -75,9 +109,10 @@ function bindEvents() {
 function applyFilter() {
   filteredPhones = allPhones.filter(p => {
     const matchesBrand = selectedBrand === "all" || p.brand.toLowerCase() === selectedBrand.toLowerCase();
+    const uzsPrice = formatUzs(p.price).toLowerCase();
     const matchesSearch = p.name.toLowerCase().includes(searchQuery) || 
                           p.chipset.toLowerCase().includes(searchQuery) ||
-                          (p.price && p.price.toLowerCase().includes(searchQuery));
+                          uzsPrice.includes(searchQuery);
     return matchesBrand && matchesSearch;
   });
   renderList();
@@ -98,7 +133,7 @@ function renderList() {
     item.innerHTML = `
       <div class="phone-item-head">
         <span class="brand">${p.brand}</span>
-        <span class="price">${p.price}</span>
+        <span class="price-uzs">${formatUzs(p.price)}</span>
       </div>
       <div class="phone-item-name">${p.name}</div>
       <div class="phone-item-chip">${p.chipset}</div>
@@ -116,24 +151,27 @@ function setPickingSlot(slotNum) {
   pickingSlot = slotNum;
   document.getElementById("slot-p1").classList.toggle("active-slot", slotNum === 1);
   document.getElementById("slot-p2").classList.toggle("active-slot", slotNum === 2);
-  document.getElementById("selected-summary").innerText = `${slotNum}-ishtirokchi uchun apparat tanlang`;
+  document.getElementById("selected-summary").innerText = `${slotNum}-apparat uchun modelni bosing`;
 }
 
 function selectPhoneForSlot(p) {
   const cloned = JSON.parse(JSON.stringify(p));
   cloned.temp = 36;
   cloned.energy = 0;
+  cloned.priceUzs = formatUzs(p.price);
 
   if (pickingSlot === 1) {
     p1 = cloned;
     document.getElementById("slot-name-p1").innerText = p1.name;
-    document.getElementById("slot-specs-p1").innerText = `${p1.price} | HP: ${p1.hp} | Zarb: ${p1.attack}`;
+    document.getElementById("slot-specs-p1").innerText = `${p1.chipset} | HP: ${p1.hp}`;
+    document.getElementById("slot-price-p1").innerText = p1.priceUzs;
     document.getElementById("slot-p1").classList.add("ready");
     setPickingSlot(2);
   } else {
     p2 = cloned;
     document.getElementById("slot-name-p2").innerText = p2.name;
-    document.getElementById("slot-specs-p2").innerText = `${p2.price} | HP: ${p2.hp} | Zarb: ${p2.attack}`;
+    document.getElementById("slot-specs-p2").innerText = `${p2.chipset} | HP: ${p2.hp}`;
+    document.getElementById("slot-price-p2").innerText = p2.priceUzs;
     document.getElementById("slot-p2").classList.add("ready");
   }
 
@@ -141,9 +179,62 @@ function selectPhoneForSlot(p) {
 
   if (p1 && p2) {
     document.getElementById("btn-fight-start").disabled = false;
+    document.getElementById("btn-compare-now").disabled = false;
     document.getElementById("selected-summary").innerHTML = 
-      `<b style="color:var(--primary)">${p1.name} (${p1.price})</b> vs <b style="color:var(--accent)">${p2.name} (${p2.price})</b> jangga tayyor!`;
+      `<b style="color:var(--primary)">${p1.name}</b> va <b style="color:var(--accent)">${p2.name}</b> tayyor! "Solishtirish" yoki "Maydonga tushish"ni bosing!`;
+    comparePhones(); // Avtomatik solishtiruvni ham chiqaradi
   }
+}
+
+// QAYSI BIRI ZO'R? (SOLISHTIRUV METODIKASI)
+function comparePhones() {
+  if (!p1 || !p2) return;
+
+  const box = document.getElementById("comparison-box");
+  const details = document.getElementById("comp-details");
+  box.classList.remove("hidden");
+
+  let p1Points = 0;
+  let p2Points = 0;
+
+  // 1. Zarb (Protsessor)
+  const atkBetter = p1.attack > p2.attack ? 1 : (p2.attack > p1.attack ? 2 : 0);
+  if (atkBetter === 1) p1Points++; if (atkBetter === 2) p2Points++;
+
+  // 2. Batareya (HP)
+  const batBetter = p1.hp > p2.hp ? 1 : (p2.hp > p1.hp ? 2 : 0);
+  if (batBetter === 1) p1Points++; if (batBetter === 2) p2Points++;
+
+  // 3. Narx (Hamyonboplik)
+  const numP1 = parseInt(p1.price.replace(/[^0-9]/g, '')) || 999;
+  const numP2 = parseInt(p2.price.replace(/[^0-9]/g, '')) || 999;
+  const priceBetter = numP1 < numP2 ? 1 : (numP2 < numP1 ? 2 : 0);
+  if (priceBetter === 1) p1Points++; if (priceBetter === 2) p2Points++;
+
+  let verdictText = "";
+  if (p1Points > p2Points) verdictText = `🔥 Umumiy ustunlik: ${p1.name} zo'roq!`;
+  else if (p2Points > p1Points) verdictText = `🔥 Umumiy ustunlik: ${p2.name} zo'roq!`;
+  else verdictText = `⚖️ Har ikkala apparat teng kuchli!`;
+
+  document.getElementById("verdict-tag").innerText = verdictText;
+
+  details.innerHTML = `
+    <div class="comp-item">
+      <span>⚙️ Protsessor va Zarb:</span>
+      <b class="${atkBetter === 1 ? 'better' : ''}">${p1.name}: ${p1.attack} ball</b> vs 
+      <b class="${atkBetter === 2 ? 'better' : ''}">${p2.name}: ${p2.attack} ball</b>
+    </div>
+    <div class="comp-item">
+      <span>🔋 Batareya & Chidamlilik:</span>
+      <b class="${batBetter === 1 ? 'better' : ''}">${p1.battery}</b> vs 
+      <b class="${batBetter === 2 ? 'better' : ''}">${p2.battery}</b>
+    </div>
+    <div class="comp-item">
+      <span>💰 Narx (Hamyonboplik):</span>
+      <b class="${priceBetter === 1 ? 'better' : ''}">${p1.priceUzs}</b> vs 
+      <b class="${priceBetter === 2 ? 'better' : ''}">${p2.priceUzs}</b>
+    </div>
+  `;
 }
 
 function startBattle() {
@@ -164,9 +255,9 @@ function resetToSelection() {
 }
 
 function setupBattleUI() {
-  // P1 to'liq ma'lumotlar
+  // P1
   document.getElementById("p1-name").innerText = p1.name;
-  document.getElementById("p1-price").innerText = p1.price;
+  document.getElementById("p1-price").innerText = p1.priceUzs;
   document.getElementById("p1-chip").innerText = p1.chipset;
   document.getElementById("p1-attack").innerText = p1.attack;
   document.getElementById("p1-defense").innerText = p1.defense;
@@ -174,11 +265,10 @@ function setupBattleUI() {
   document.getElementById("p1-charging").innerText = p1.charging ? p1.charging.split(',')[0] : "Standart";
   document.getElementById("p1-screen").innerText = p1.screen ? p1.screen.split(',')[0] : "OLED";
   document.getElementById("p1-camera").innerText = p1.camera ? p1.camera.split('+')[0] : "Asosiy";
-  document.getElementById("p1-storage").innerText = `${p1.ram} / ${p1.storage ? p1.storage.split('/')[0] : ''}`;
 
-  // P2 to'liq ma'lumotlar
+  // P2
   document.getElementById("p2-name").innerText = p2.name;
-  document.getElementById("p2-price").innerText = p2.price;
+  document.getElementById("p2-price").innerText = p2.priceUzs;
   document.getElementById("p2-chip").innerText = p2.chipset;
   document.getElementById("p2-attack").innerText = p2.attack;
   document.getElementById("p2-defense").innerText = p2.defense;
@@ -186,10 +276,9 @@ function setupBattleUI() {
   document.getElementById("p2-charging").innerText = p2.charging ? p2.charging.split(',')[0] : "Standart";
   document.getElementById("p2-screen").innerText = p2.screen ? p2.screen.split(',')[0] : "OLED";
   document.getElementById("p2-camera").innerText = p2.camera ? p2.camera.split('+')[0] : "Asosiy";
-  document.getElementById("p2-storage").innerText = `${p2.ram} / ${p2.storage ? p2.storage.split('/')[0] : ''}`;
 
   updateUI();
-  setCommentary(`Maydonda: ${p1.name} (${p1.price}) va ${p2.name} (${p2.price})! Zarbani boshla og'a!`);
+  setCommentary(`Maydonda: ${p1.name} (${p1.priceUzs}) va ${p2.name} (${p2.priceUzs})! Urganch to'yxonasiday shovqin, boshla og'a!`);
 }
 
 function updateUI() {
@@ -271,35 +360,34 @@ function doAction(type) {
   updateUI();
 }
 
-// "NIMA UCHUN YUTDI?" TAHLIL TIZIMI
+// ILMIY TAHLIL: NIMA UCHUN YUTDI?
 function showVerdict(winner, loser) {
   document.getElementById("verdict-winner-name").innerText = `${winner.name} G'alaba Qozondi!`;
-  document.getElementById("verdict-vs-text").innerText = `${winner.name} (${winner.price}) vs ${loser.name} (${loser.price})`;
+  document.getElementById("verdict-vs-text").innerText = `${winner.name} (${winner.priceUzs}) vs ${loser.name} (${loser.priceUzs})`;
 
   const reasonsList = document.getElementById("verdict-reasons");
   reasonsList.innerHTML = "";
-
   const reasons = [];
 
-  // Protsessor tahlili
+  // Chipset tahlili
   if (winner.attack > loser.attack) {
-    reasons.push(`<b>Kuchliroq protsessor kuchi:</b> ${winner.name} ning chipseti (${winner.chipset}) raqibga qaraganda ko'proq FPS va soniyasiga ko'proq zarba berdi.`);
+    reasons.push(`<b>Kuchliroq protsessor kuchi:</b> ${winner.name} ning chipseti (${winner.chipset}) raqibga qaraganda ko'proq FPS va soniyasiga ko'proq hisob-kitob qildi.`);
   }
 
-  // Akkumulyator tahlili
+  // Batareya tahlili
   if (winner.max_hp > loser.max_hp) {
-    reasons.push(`<b>Energiya zaxirasi ustunligi:</b> ${winner.name} ning batareyasi (${winner.battery}) ko'proq vaqt bardosh berdi, raqibining zaryadi ertaroq tugadi.`);
+    reasons.push(`<b>Quvvat zaxirasi:</b> ${winner.name} ning akkumulyatori (${winner.battery}) og'ir yuklamaga ko'proq bardosh berdi.`);
   }
 
-  // Himoya tahlili
+  // Himoya va sovutish tahlili
   if (winner.defense >= loser.defense) {
-    reasons.push(`<b>Mustahkam korpus va sovutish:</b> ${winner.name} zarbalarni yaxshiroq yutdi va trotling bo'lmay, barqaror ishlay oldi.`);
+    reasons.push(`<b>Sovutish va barqarorlik:</b> ${winner.name} dushmanning zarbalaridan so'ng qizib ketmay, tezroq soviy oldi.`);
   } else {
-    reasons.push(`<b>Taktik ustunlik:</b> ${winner.name} himoyasi kamroq bo'lsa ham, tezkor kontr-hujumlar va zaryadlash tezligi bilan raqibni yengdi.`);
+    reasons.push(`<b>Tezkor manyovr:</b> ${winner.name} himoyasi kamroq bo'lsa-da, chaqqon zarbalar va yuqori chastota hisobiga ustun keldi.`);
   }
 
-  // Narx / Qiymat tahlili
-  reasons.push(`<b>Bozor bahosi xulosasi:</b> ${winner.name} (${winner.price}) maydonda o'z narxini to'liq oqladi va raqibiga imkoniyat qoldirmadi.`);
+  // Bozor qiymati tahlili
+  reasons.push(`<b>Iqtisodiy xulosa:</b> ${winner.name} (${winner.priceUzs}) o'z bahosini to'laqonli oqladi va maydonda mutlaq g'olib deb topildi!`);
 
   reasons.forEach(r => {
     const li = document.createElement("li");
