@@ -3,14 +3,13 @@ let filteredPhones = [];
 
 let p1 = null;
 let p2 = null;
-let currentTurn = 1; // 1 yoki 2
+let currentTurn = 1;
 let isBattleOver = false;
-let pickingSlot = 1; // Hozir qaysi o'yinchiga telefon saylanyapti
+let pickingSlot = 1;
 
 let selectedBrand = "all";
 let searchQuery = "";
 
-// Xorazmcha jonli dialoglar
 const xorazmPhrases = {
   attack: [
     "Apparat bilan to'g'ri manglayidan urdi!",
@@ -63,8 +62,9 @@ function bindEvents() {
 
   document.getElementById("btn-fight-start").onclick = startBattle;
   document.getElementById("btn-change-phone").onclick = resetToSelection;
+  document.getElementById("btn-play-again").onclick = resetToSelection;
 
-  // Jang harakatlari
+  // Harakatlar
   document.getElementById("btn-attack").onclick = () => doAction("attack");
   document.getElementById("btn-crit").onclick = () => doAction("crit");
   document.getElementById("btn-cool").onclick = () => doAction("cool");
@@ -76,7 +76,8 @@ function applyFilter() {
   filteredPhones = allPhones.filter(p => {
     const matchesBrand = selectedBrand === "all" || p.brand.toLowerCase() === selectedBrand.toLowerCase();
     const matchesSearch = p.name.toLowerCase().includes(searchQuery) || 
-                          p.chipset.toLowerCase().includes(searchQuery);
+                          p.chipset.toLowerCase().includes(searchQuery) ||
+                          (p.price && p.price.toLowerCase().includes(searchQuery));
     return matchesBrand && matchesSearch;
   });
   renderList();
@@ -104,14 +105,13 @@ function renderList() {
       <div class="phone-item-stats">
         <span>HP: <b>${p.hp}</b></span>
         <span>Zarb: <b>${p.attack}</b></span>
-        <span>Himoya: <b>${p.defense}</b></span>
+        <span>Bat: <b>${p.battery.split(' ')[0]}</b></span>
       </div>
     `;
     container.appendChild(item);
   });
 }
 
-// Qaysi slot aktiv ekanini belgilash
 function setPickingSlot(slotNum) {
   pickingSlot = slotNum;
   document.getElementById("slot-p1").classList.toggle("active-slot", slotNum === 1);
@@ -119,7 +119,6 @@ function setPickingSlot(slotNum) {
   document.getElementById("selected-summary").innerText = `${slotNum}-ishtirokchi uchun apparat tanlang`;
 }
 
-// Foydalanuvchi tanlagan telefonni kerakli slotga kiritish
 function selectPhoneForSlot(p) {
   const cloned = JSON.parse(JSON.stringify(p));
   cloned.temp = 36;
@@ -128,30 +127,30 @@ function selectPhoneForSlot(p) {
   if (pickingSlot === 1) {
     p1 = cloned;
     document.getElementById("slot-name-p1").innerText = p1.name;
-    document.getElementById("slot-specs-p1").innerText = `HP: ${p1.hp} | Zarb: ${p1.attack}`;
+    document.getElementById("slot-specs-p1").innerText = `${p1.price} | HP: ${p1.hp} | Zarb: ${p1.attack}`;
     document.getElementById("slot-p1").classList.add("ready");
-    setPickingSlot(2); // Avtomatik 2-slotga o'tkazadi
+    setPickingSlot(2);
   } else {
     p2 = cloned;
     document.getElementById("slot-name-p2").innerText = p2.name;
-    document.getElementById("slot-specs-p2").innerText = `HP: ${p2.hp} | Zarb: ${p2.attack}`;
+    document.getElementById("slot-specs-p2").innerText = `${p2.price} | HP: ${p2.hp} | Zarb: ${p2.attack}`;
     document.getElementById("slot-p2").classList.add("ready");
   }
 
   renderList();
 
-  // Agar ikkala telefon ham tanlangan bo'lsa, start tugmasi yonadi
   if (p1 && p2) {
     document.getElementById("btn-fight-start").disabled = false;
     document.getElementById("selected-summary").innerHTML = 
-      `<b style="color:var(--primary)">${p1.name}</b> vs <b style="color:var(--accent)">${p2.name}</b> maydonga tayyor!`;
+      `<b style="color:var(--primary)">${p1.name} (${p1.price})</b> vs <b style="color:var(--accent)">${p2.name} (${p2.price})</b> jangga tayyor!`;
   }
 }
 
 function startBattle() {
   isBattleOver = false;
-  currentTurn = p1.speed >= p2.speed ? 1 : 2; // Tezligi yuqorisi birinchi boshlaydi
+  currentTurn = p1.speed >= p2.speed ? 1 : 2;
 
+  document.getElementById("modal-verdict").classList.add("hidden");
   document.getElementById("selection-phase").classList.add("hidden");
   document.getElementById("battle-phase").classList.remove("hidden");
 
@@ -159,31 +158,41 @@ function startBattle() {
 }
 
 function resetToSelection() {
+  document.getElementById("modal-verdict").classList.add("hidden");
   document.getElementById("battle-phase").classList.add("hidden");
   document.getElementById("selection-phase").classList.remove("hidden");
 }
 
 function setupBattleUI() {
-  // P1
+  // P1 to'liq ma'lumotlar
   document.getElementById("p1-name").innerText = p1.name;
+  document.getElementById("p1-price").innerText = p1.price;
   document.getElementById("p1-chip").innerText = p1.chipset;
   document.getElementById("p1-attack").innerText = p1.attack;
   document.getElementById("p1-defense").innerText = p1.defense;
-  document.getElementById("p1-cam").innerText = p1.camera.split('+')[0] || "Asosiy";
+  document.getElementById("p1-battery").innerText = p1.battery;
+  document.getElementById("p1-charging").innerText = p1.charging ? p1.charging.split(',')[0] : "Standart";
+  document.getElementById("p1-screen").innerText = p1.screen ? p1.screen.split(',')[0] : "OLED";
+  document.getElementById("p1-camera").innerText = p1.camera ? p1.camera.split('+')[0] : "Asosiy";
+  document.getElementById("p1-storage").innerText = `${p1.ram} / ${p1.storage ? p1.storage.split('/')[0] : ''}`;
 
-  // P2
+  // P2 to'liq ma'lumotlar
   document.getElementById("p2-name").innerText = p2.name;
+  document.getElementById("p2-price").innerText = p2.price;
   document.getElementById("p2-chip").innerText = p2.chipset;
   document.getElementById("p2-attack").innerText = p2.attack;
   document.getElementById("p2-defense").innerText = p2.defense;
-  document.getElementById("p2-cam").innerText = p2.camera.split('+')[0] || "Asosiy";
+  document.getElementById("p2-battery").innerText = p2.battery;
+  document.getElementById("p2-charging").innerText = p2.charging ? p2.charging.split(',')[0] : "Standart";
+  document.getElementById("p2-screen").innerText = p2.screen ? p2.screen.split(',')[0] : "OLED";
+  document.getElementById("p2-camera").innerText = p2.camera ? p2.camera.split('+')[0] : "Asosiy";
+  document.getElementById("p2-storage").innerText = `${p2.ram} / ${p2.storage ? p2.storage.split('/')[0] : ''}`;
 
   updateUI();
-  setCommentary(`Maydonga ${p1.name} va ${p2.name} tushdi! Harakat: ${currentTurn}-apparatda!`);
+  setCommentary(`Maydonda: ${p1.name} (${p1.price}) va ${p2.name} (${p2.price})! Zarbani boshla og'a!`);
 }
 
 function updateUI() {
-  // HP & Energy
   document.getElementById("p1-hp-bar").style.width = Math.max(0, (p1.hp / p1.max_hp) * 100) + "%";
   document.getElementById("p1-hp-text").innerText = `${Math.max(0, p1.hp)}/${p1.max_hp}`;
   document.getElementById("p1-energy-bar").style.width = p1.energy + "%";
@@ -196,7 +205,6 @@ function updateUI() {
   document.getElementById("p2-energy-text").innerText = p2.energy + "%";
   document.getElementById("p2-temp").innerText = p2.temp + "°C";
 
-  // Turn box indicator
   document.getElementById("p1-box").classList.toggle("active-turn", currentTurn === 1);
   document.getElementById("p2-box").classList.toggle("active-turn", currentTurn === 2);
   document.getElementById("turn-indicator").innerText = `Navbat: ${currentTurn === 1 ? p1.name : p2.name}`;
@@ -212,7 +220,7 @@ function doAction(type) {
   const defender = currentTurn === 1 ? p2 : p1;
 
   if (type === "attack") {
-    const dmg = Math.max(8, attacker.attack - Math.floor(defender.defense / 3) + rand(-4, 4));
+    const dmg = Math.max(8, attacker.attack - Math.floor(defender.defense / 3) + rand(-3, 3));
     defender.hp -= dmg;
     attacker.energy = Math.min(100, attacker.energy + 25);
     attacker.temp += 2;
@@ -233,7 +241,7 @@ function doAction(type) {
   else if (type === "cool") {
     attacker.temp = Math.max(30, attacker.temp - 8);
     attacker.hp = Math.min(attacker.max_hp, attacker.hp + 12);
-    setCommentary(`❄️ <b>${attacker.name}</b> sovutildi va himoyalandi! ${getRandom(xorazmPhrases.cool)}`);
+    setCommentary(`❄️ <b>${attacker.name}</b> sovutildi va mustahkamlandi! ${getRandom(xorazmPhrases.cool)}`);
   } 
   else if (type === "charge") {
     const heal = Math.floor(attacker.max_hp * 0.25);
@@ -255,13 +263,51 @@ function doAction(type) {
     defender.hp = 0;
     updateUI();
     isBattleOver = true;
-    setCommentary(`🏆 <b>G'ALABA! ${attacker.name} maydonda yagona hukmdor bo'ldi og'a!</b>`);
+    showVerdict(attacker, defender);
     return;
   }
 
-  // Navbatni ikkinchi apparatga berish
   currentTurn = currentTurn === 1 ? 2 : 1;
   updateUI();
+}
+
+// "NIMA UCHUN YUTDI?" TAHLIL TIZIMI
+function showVerdict(winner, loser) {
+  document.getElementById("verdict-winner-name").innerText = `${winner.name} G'alaba Qozondi!`;
+  document.getElementById("verdict-vs-text").innerText = `${winner.name} (${winner.price}) vs ${loser.name} (${loser.price})`;
+
+  const reasonsList = document.getElementById("verdict-reasons");
+  reasonsList.innerHTML = "";
+
+  const reasons = [];
+
+  // Protsessor tahlili
+  if (winner.attack > loser.attack) {
+    reasons.push(`<b>Kuchliroq protsessor kuchi:</b> ${winner.name} ning chipseti (${winner.chipset}) raqibga qaraganda ko'proq FPS va soniyasiga ko'proq zarba berdi.`);
+  }
+
+  // Akkumulyator tahlili
+  if (winner.max_hp > loser.max_hp) {
+    reasons.push(`<b>Energiya zaxirasi ustunligi:</b> ${winner.name} ning batareyasi (${winner.battery}) ko'proq vaqt bardosh berdi, raqibining zaryadi ertaroq tugadi.`);
+  }
+
+  // Himoya tahlili
+  if (winner.defense >= loser.defense) {
+    reasons.push(`<b>Mustahkam korpus va sovutish:</b> ${winner.name} zarbalarni yaxshiroq yutdi va trotling bo'lmay, barqaror ishlay oldi.`);
+  } else {
+    reasons.push(`<b>Taktik ustunlik:</b> ${winner.name} himoyasi kamroq bo'lsa ham, tezkor kontr-hujumlar va zaryadlash tezligi bilan raqibni yengdi.`);
+  }
+
+  // Narx / Qiymat tahlili
+  reasons.push(`<b>Bozor bahosi xulosasi:</b> ${winner.name} (${winner.price}) maydonda o'z narxini to'liq oqladi va raqibiga imkoniyat qoldirmadi.`);
+
+  reasons.forEach(r => {
+    const li = document.createElement("li");
+    li.innerHTML = r;
+    reasonsList.appendChild(li);
+  });
+
+  document.getElementById("modal-verdict").classList.remove("hidden");
 }
 
 function rand(min, max) {

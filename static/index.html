@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="bg-glow"></div>
@@ -15,32 +15,30 @@
   <header class="app-header">
     <div class="badge">⚔️ URGANCH 1V1 ARENA</div>
     <h1>TELEFON-JANG</h1>
-    <p class="subtitle">Ikkita apparatni o'zingiz saylang: Haqiqiy xarakteristikalar to'qnashuvi!</p>
+    <p class="subtitle">Aniq parametrlar, narxlar va ilmiy jang tahlili!</p>
   </header>
 
   <main class="container">
-    <!-- 1-BOSQICH: IKKITA TELEFONNI SAYLASH (MANUAL 1v1) -->
+    <!-- 1-BOSQICH: IKKITA TELEFONNI SAYLASH -->
     <section id="selection-phase" class="card">
       <div class="selection-slots">
-        <!-- 1-O'yinchi Slot -->
         <div class="slot-card active-slot" id="slot-p1" onclick="setPickingSlot(1)">
-          <span class="slot-badge">1-ISHTIROKCHI</span>
-          <h3 id="slot-name-p1">Apparat saylang...</h3>
+          <span class="slot-badge">1-ISHTIROKCHI (CHAP)</span>
+          <h3 id="slot-name-p1">1-Apparatni saylang...</h3>
           <p id="slot-specs-p1" class="slot-sub">Ro'yxatdan bosing</p>
         </div>
 
         <div class="slot-vs">VS</div>
 
-        <!-- 2-O'yinchi Slot -->
         <div class="slot-card" id="slot-p2" onclick="setPickingSlot(2)">
-          <span class="slot-badge">2-ISHTIROKCHI</span>
-          <h3 id="slot-name-p2">Apparat saylang...</h3>
+          <span class="slot-badge">2-ISHTIROKCHI (O'NG)</span>
+          <h3 id="slot-name-p2">2-Apparatni saylang...</h3>
           <p id="slot-specs-p2" class="slot-sub">Ro'yxatdan bosing</p>
         </div>
       </div>
 
       <div class="filter-bar">
-        <input type="text" id="search-box" placeholder="🔍 Model yoki chipsetni qidiring (masalan: 17 Pro Max, S26, 3310, Dimensity)..." autocomplete="off">
+        <input type="text" id="search-box" placeholder="🔍 Model, protsessor yoki narx bo'yicha qidiring (masalan: 17 Pro, S26, $999, Dimensity)..." autocomplete="off">
         <div class="brand-chips" id="brand-filters">
           <button class="chip-btn active" data-brand="all">Barchasi</button>
           <button class="chip-btn" data-brand="Apple">Apple</button>
@@ -52,7 +50,7 @@
         </div>
       </div>
 
-      <!-- Ixcham Apparatlar Paneli -->
+      <!-- Ixcham ro'yxat -->
       <div id="phone-grid" class="phone-compact-grid"></div>
 
       <div class="start-bar">
@@ -61,17 +59,20 @@
       </div>
     </section>
 
-    <!-- 2-BOSQICH: JANG ARENASI -->
+    <!-- 2-BOSQICH: TO'LIQ XARAKTERISTIKALI JANG MAYDONI -->
     <section id="battle-phase" class="card hidden">
       <div class="arena-header">
-        <div class="turn-indicator" id="turn-indicator">Harakat: 1-Ishtirokchida</div>
+        <div class="turn-indicator" id="turn-indicator">Navbat: 1-Ishtirokchida</div>
         <button id="btn-change-phone" class="btn-link">← Boshqa apparat saylash</button>
       </div>
 
       <div class="battlefield">
-        <!-- 1-O'yinchi Apparat -->
+        <!-- 1-Apparat -->
         <div class="fighter-box p1" id="p1-box">
-          <div class="fighter-role">1-APPARAT</div>
+          <div class="fighter-top-row">
+            <span class="fighter-role">1-APPARAT</span>
+            <span class="fighter-price" id="p1-price">$0</span>
+          </div>
           <h3 id="p1-name" class="fighter-name">-</h3>
           <div class="chip-badge" id="p1-chip">-</div>
           
@@ -85,17 +86,25 @@
             <div class="stat-track"><div id="p1-energy-bar" class="stat-fill energy-fill"></div></div>
           </div>
 
-          <div class="specs-grid">
-            <div>⚡ Zarb: <b id="p1-attack">0</b></div>
-            <div>🛡 Himoya: <b id="p1-defense">0</b></div>
-            <div>🌡 Harorat: <b id="p1-temp">36°C</b></div>
-            <div>📷 Kamera: <b id="p1-cam">-</b></div>
+          <!-- To'liq xarakteristika jadvali -->
+          <div class="full-specs-table">
+            <div class="spec-cell"><span>⚡ Zarb:</span><b id="p1-attack">0</b></div>
+            <div class="spec-cell"><span>🛡 Himoya:</span><b id="p1-defense">0</b></div>
+            <div class="spec-cell"><span>🔋 Batareya:</span><b id="p1-battery">-</b></div>
+            <div class="spec-cell"><span>⚡ Quvvatlash:</span><b id="p1-charging">-</b></div>
+            <div class="spec-cell"><span>📺 Ekran:</span><b id="p1-screen">-</b></div>
+            <div class="spec-cell"><span>📷 Kamera:</span><b id="p1-camera">-</b></div>
+            <div class="spec-cell"><span>💾 Xotira/RAM:</span><b id="p1-storage">-</b></div>
+            <div class="spec-cell"><span>🌡 Harorat:</span><b id="p1-temp">36°C</b></div>
           </div>
         </div>
 
-        <!-- 2-O'yinchi Apparat -->
+        <!-- 2-Apparat -->
         <div class="fighter-box p2" id="p2-box">
-          <div class="fighter-role">2-APPARAT</div>
+          <div class="fighter-top-row">
+            <span class="fighter-role">2-APPARAT</span>
+            <span class="fighter-price" id="p2-price">$0</span>
+          </div>
           <h3 id="p2-name" class="fighter-name">-</h3>
           <div class="chip-badge" id="p2-chip">-</div>
           
@@ -109,20 +118,25 @@
             <div class="stat-track"><div id="p2-energy-bar" class="stat-fill energy-fill"></div></div>
           </div>
 
-          <div class="specs-grid">
-            <div>⚡ Zarb: <b id="p2-attack">0</b></div>
-            <div>🛡 Himoya: <b id="p2-defense">0</b></div>
-            <div>🌡 Harorat: <b id="p2-temp">36°C</b></div>
-            <div>📷 Kamera: <b id="p2-cam">-</b></div>
+          <!-- To'liq xarakteristika jadvali -->
+          <div class="full-specs-table">
+            <div class="spec-cell"><span>⚡ Zarb:</span><b id="p2-attack">0</b></div>
+            <div class="spec-cell"><span>🛡 Himoya:</span><b id="p2-defense">0</b></div>
+            <div class="spec-cell"><span>🔋 Batareya:</span><b id="p2-battery">-</b></div>
+            <div class="spec-cell"><span>⚡ Quvvatlash:</span><b id="p2-charging">-</b></div>
+            <div class="spec-cell"><span>📺 Ekran:</span><b id="p2-screen">-</b></div>
+            <div class="spec-cell"><span>📷 Kamera:</span><b id="p2-camera">-</b></div>
+            <div class="spec-cell"><span>💾 Xotira/RAM:</span><b id="p2-storage">-</b></div>
+            <div class="spec-cell"><span>🌡 Harorat:</span><b id="p2-temp">36°C</b></div>
           </div>
         </div>
       </div>
 
-      <!-- Taktik Boshqaruv Tugmalari -->
+      <!-- Jang harakatlari -->
       <div class="actions-panel">
         <button id="btn-attack" class="btn btn-attack">💥 GULLATIB URISH</button>
         <button id="btn-crit" class="btn btn-crit">🚀 OVERCLOCK (Kuchli zarb)</button>
-        <button id="btn-cool" class="btn btn-cool">❄️ KULER QO'YISH (Sovutish + Qalqon)</button>
+        <button id="btn-cool" class="btn btn-cool">❄️ KULER QO'YISH (Sovutish)</button>
         <button id="btn-charge" class="btn btn-charge">🔌 PAYNETDAN PUL SOLISH (+HP)</button>
         <button id="btn-ulta" class="btn btn-ulta" disabled>🔥 TARAS-QARS ULTA (100%)</button>
       </div>
@@ -134,6 +148,26 @@
       </div>
     </section>
   </main>
+
+  <!-- G'ALABA VA MAG'LUBIYAT TAHLILI (NIMA UCHUN YUTDI?) -->
+  <div id="modal-verdict" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="verdict-header">
+        <span class="trophy-icon">🏆</span>
+        <h2 id="verdict-winner-name">G'alaba!</h2>
+        <span class="verdict-score" id="verdict-vs-text">-</span>
+      </div>
+      <div class="verdict-body">
+        <h4 class="verdict-subtitle">NIMA UCHUN YUTDI? (TEXNIK TAHLIL)</h4>
+        <ul id="verdict-reasons" class="verdict-list">
+          <!-- JS orqali sabablar chiqadi -->
+        </ul>
+      </div>
+      <div class="verdict-footer">
+        <button id="btn-play-again" class="btn btn-primary" style="width: 100%;">QAYTA JANG QILISH 🔄</button>
+      </div>
+    </div>
+  </div>
 
   <footer class="app-footer">
     <p>TELEFON-JANG &copy; 2026 | Urganch kiber-klubi</p>
