@@ -9,7 +9,7 @@ let pickingSlot = 1;
 
 let selectedBrand = "all";
 let searchQuery = "";
-let modalTargetPhone = null; // Katta pasportda ochilgan telefon
+let modalTargetPhone = null;
 
 let usdToUzsRate = 12900;
 
@@ -42,10 +42,15 @@ const xorazmPhrases = {
   ]
 };
 
+// Sahifa to'liq yuklangach ishga tushadi
+document.addEventListener("DOMContentLoaded", () => {
+  init();
+});
+
 async function init() {
+  bindEvents();
   await fetchExchangeRate();
   await loadPhonesData();
-  bindEvents();
 }
 
 async function fetchExchangeRate() {
@@ -54,10 +59,12 @@ async function fetchExchangeRate() {
     const data = await res.json();
     if (data && data.rates && data.rates.UZS) {
       usdToUzsRate = Math.round(data.rates.UZS);
-      document.getElementById("usd-rate-badge").innerText = `1$ = ${usdToUzsRate.toLocaleString('uz-UZ')} so'm (Jonli)`;
+      const el = document.getElementById("usd-rate-badge");
+      if (el) el.innerText = `1$ = ${usdToUzsRate.toLocaleString('uz-UZ')} so'm (Jonli)`;
     }
   } catch (e) {
-    document.getElementById("usd-rate-badge").innerText = `1$ = ${usdToUzsRate.toLocaleString('uz-UZ')} so'm (Oflayn)`;
+    const el = document.getElementById("usd-rate-badge");
+    if (el) el.innerText = `1$ = ${usdToUzsRate.toLocaleString('uz-UZ')} so'm (Oflayn)`;
   }
 }
 
@@ -76,15 +83,19 @@ async function loadPhonesData() {
     filteredPhones = [...allPhones];
     renderList();
   } catch (err) {
-    document.getElementById("phone-grid").innerHTML = "<p>phones.json yuklanmadi!</p>";
+    const grid = document.getElementById("phone-grid");
+    if (grid) grid.innerHTML = "<p>phones.json yuklanmadi!</p>";
   }
 }
 
 function bindEvents() {
-  document.getElementById("search-box").addEventListener("input", (e) => {
-    searchQuery = e.target.value.toLowerCase().trim();
-    applyFilter();
-  });
+  const searchInput = document.getElementById("search-box");
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      applyFilter();
+    });
+  }
 
   document.querySelectorAll(".chip-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -95,30 +106,51 @@ function bindEvents() {
     });
   });
 
-  document.getElementById("btn-compare-now").onclick = comparePhones;
-  document.getElementById("btn-fight-start").onclick = startBattle;
-  document.getElementById("btn-change-phone").onclick = resetToSelection;
-  document.getElementById("btn-play-again").onclick = resetToSelection;
+  const btnCompare = document.getElementById("btn-compare-now");
+  if (btnCompare) btnCompare.onclick = comparePhones;
 
-  // Harakatlar
-  document.getElementById("btn-attack").onclick = () => doAction("attack");
-  document.getElementById("btn-crit").onclick = () => doAction("crit");
-  document.getElementById("btn-cool").onclick = () => doAction("cool");
-  document.getElementById("btn-charge").onclick = () => doAction("charge");
-  document.getElementById("btn-ulta").onclick = () => doAction("ulta");
+  const btnFightStart = document.getElementById("btn-fight-start");
+  if (btnFightStart) btnFightStart.onclick = startBattle;
 
-  // Pasport ichidan tanlash
-  document.getElementById("btn-pick-from-modal").onclick = () => {
-    if (modalTargetPhone) {
-      selectPhoneForSlot(modalTargetPhone);
-      closePassport();
-    }
-  };
+  const btnChangePhone = document.getElementById("btn-change-phone");
+  if (btnChangePhone) btnChangePhone.onclick = resetToSelection;
 
-  // Tashqi fonga bosilganda pasportni yopish
-  document.getElementById("modal-passport").onclick = (e) => {
-    if (e.target.id === "modal-passport") closePassport();
-  };
+  const btnPlayAgain = document.getElementById("btn-play-again");
+  if (btnPlayAgain) btnPlayAgain.onclick = resetToSelection;
+
+  // Jang harakatlari tugmalari
+  const btnAttack = document.getElementById("btn-attack");
+  if (btnAttack) btnAttack.onclick = () => doAction("attack");
+
+  const btnCrit = document.getElementById("btn-crit");
+  if (btnCrit) btnCrit.onclick = () => doAction("crit");
+
+  const btnCool = document.getElementById("btn-cool");
+  if (btnCool) btnCool.onclick = () => doAction("cool");
+
+  const btnCharge = document.getElementById("btn-charge");
+  if (btnCharge) btnCharge.onclick = () => doAction("charge");
+
+  const btnUlta = document.getElementById("btn-ulta");
+  if (btnUlta) btnUlta.onclick = () => doAction("ulta");
+
+  // Pasportdan apparatni tanlash
+  const btnPickModal = document.getElementById("btn-pick-from-modal");
+  if (btnPickModal) {
+    btnPickModal.onclick = () => {
+      if (modalTargetPhone) {
+        selectPhoneForSlot(modalTargetPhone);
+        closePassport();
+      }
+    };
+  }
+
+  const modalPassport = document.getElementById("modal-passport");
+  if (modalPassport) {
+    modalPassport.onclick = (e) => {
+      if (e.target.id === "modal-passport") closePassport();
+    };
+  }
 }
 
 function applyFilter() {
@@ -135,6 +167,7 @@ function applyFilter() {
 
 function renderList() {
   const container = document.getElementById("phone-grid");
+  if (!container) return;
   container.innerHTML = "";
 
   filteredPhones.forEach(p => {
@@ -164,9 +197,12 @@ function renderList() {
 
 function setPickingSlot(slotNum) {
   pickingSlot = slotNum;
-  document.getElementById("slot-p1").classList.toggle("active-slot", slotNum === 1);
-  document.getElementById("slot-p2").classList.toggle("active-slot", slotNum === 2);
-  document.getElementById("selected-summary").innerText = `${slotNum}-apparat uchun modelni bosing yoki Pasportini oching`;
+  const s1 = document.getElementById("slot-p1");
+  const s2 = document.getElementById("slot-p2");
+  if (s1) s1.classList.toggle("active-slot", slotNum === 1);
+  if (s2) s2.classList.toggle("active-slot", slotNum === 2);
+  const summary = document.getElementById("selected-summary");
+  if (summary) summary.innerText = `${slotNum}-apparat uchun modelni bosing yoki Pasportini oching`;
 }
 
 function selectPhoneForSlot(p) {
@@ -181,7 +217,8 @@ function selectPhoneForSlot(p) {
     document.getElementById("slot-specs-p1").innerText = `${p1.chipset.split('(')[0]} | HP: ${p1.hp}`;
     document.getElementById("slot-price-p1").innerText = p1.priceUzs;
     document.getElementById("slot-p1").classList.add("ready");
-    document.getElementById("btn-view-p1").style.display = "inline-block";
+    const btnV1 = document.getElementById("btn-view-p1");
+    if (btnV1) btnV1.style.display = "inline-block";
     setPickingSlot(2);
   } else {
     p2 = cloned;
@@ -189,23 +226,23 @@ function selectPhoneForSlot(p) {
     document.getElementById("slot-specs-p2").innerText = `${p2.chipset.split('(')[0]} | HP: ${p2.hp}`;
     document.getElementById("slot-price-p2").innerText = p2.priceUzs;
     document.getElementById("slot-p2").classList.add("ready");
-    document.getElementById("btn-view-p2").style.display = "inline-block";
+    const btnV2 = document.getElementById("btn-view-p2");
+    if (btnV2) btnV2.style.display = "inline-block";
   }
 
   renderList();
 
   if (p1 && p2) {
-    document.getElementById("btn-fight-start").disabled = false;
-    document.getElementById("btn-compare-now").disabled = false;
+    const btnStart = document.getElementById("btn-fight-start");
+    const btnComp = document.getElementById("btn-compare-now");
+    if (btnStart) btnStart.disabled = false;
+    if (btnComp) btnComp.disabled = false;
     document.getElementById("selected-summary").innerHTML = 
       `<b style="color:var(--primary)">${p1.name}</b> va <b style="color:var(--accent)">${p2.name}</b> tayyor! "Katta Tahlil" yoki "Maydonda Urishtirish"ni bosing!`;
     comparePhones();
   }
 }
 
-// =========================================
-// KATTA PASPORT MODALINI OCHISH FUNKSIYALARI
-// =========================================
 function openFullPassportById(id) {
   const phone = allPhones.find(x => x.id === id);
   if (phone) openFullPassport(phone);
@@ -235,16 +272,16 @@ function openFullPassport(phone) {
 }
 
 function closePassport() {
-  document.getElementById("modal-passport").classList.add("hidden");
+  const modal = document.getElementById("modal-passport");
+  if (modal) modal.classList.add("hidden");
 }
 
-// QAYSI BIRI ZO'R? (SOLISHTIRUV METODIKASI)
 function comparePhones() {
   if (!p1 || !p2) return;
 
   const box = document.getElementById("comparison-box");
   const details = document.getElementById("comp-details");
-  box.classList.remove("hidden");
+  if (box) box.classList.remove("hidden");
 
   let p1Points = 0;
   let p2Points = 0;
@@ -265,30 +302,34 @@ function comparePhones() {
   else if (p2Points > p1Points) verdictText = `🔥 Umumiy ustunlik: ${p2.name} zo'roq!`;
   else verdictText = `⚖️ Har ikkala apparat deyarli teng kuchli!`;
 
-  document.getElementById("verdict-tag").innerText = verdictText;
+  const verdictTag = document.getElementById("verdict-tag");
+  if (verdictTag) verdictTag.innerText = verdictText;
 
-  details.innerHTML = `
-    <div class="comp-item">
-      <span>⚙️ Protsessor va Zarb:</span>
-      <b class="${atkBetter === 1 ? 'better' : ''}">${p1.name}: ${p1.attack} ball</b> vs 
-      <b class="${atkBetter === 2 ? 'better' : ''}">${p2.name}: ${p2.attack} ball</b>
-    </div>
-    <div class="comp-item">
-      <span>🔋 Batareya & Chidamlilik:</span>
-      <b class="${batBetter === 1 ? 'better' : ''}">${p1.battery}</b> vs 
-      <b class="${batBetter === 2 ? 'better' : ''}">${p2.battery}</b>
-    </div>
-    <div class="comp-item">
-      <span>💰 Hamyonboplik (Narx/Sifat):</span>
-      <b class="${priceBetter === 1 ? 'better' : ''}">${p1.priceUzs}</b> vs 
-      <b class="${priceBetter === 2 ? 'better' : ''}">${p2.priceUzs}</b>
-    </div>
-  `;
+  if (details) {
+    details.innerHTML = `
+      <div class="comp-item">
+        <span>⚙️ Protsessor va Zarb:</span>
+        <b class="${atkBetter === 1 ? 'better' : ''}">${p1.name}: ${p1.attack} ball</b> vs 
+        <b class="${atkBetter === 2 ? 'better' : ''}">${p2.name}: ${p2.attack} ball</b>
+      </div>
+      <div class="comp-item">
+        <span>🔋 Batareya & Chidamlilik:</span>
+        <b class="${batBetter === 1 ? 'better' : ''}">${p1.battery}</b> vs 
+        <b class="${batBetter === 2 ? 'better' : ''}">${p2.battery}</b>
+      </div>
+      <div class="comp-item">
+        <span>💰 Hamyonboplik (Narx/Sifat):</span>
+        <b class="${priceBetter === 1 ? 'better' : ''}">${p1.priceUzs}</b> vs 
+        <b class="${priceBetter === 2 ? 'better' : ''}">${p2.priceUzs}</b>
+      </div>
+    `;
+  }
 }
 
 function startBattle() {
+  if (!p1 || !p2) return;
   isBattleOver = false;
-  currentTurn = p1.speed >= p2.speed ? 1 : 2;
+  currentTurn = (p1.speed || 30) >= (p2.speed || 30) ? 1 : 2;
 
   document.getElementById("modal-verdict").classList.add("hidden");
   document.getElementById("selection-phase").classList.add("hidden");
@@ -327,7 +368,7 @@ function setupBattleUI() {
   document.getElementById("p2-mat").innerText = p2.materials ? p2.materials.split(',')[0] : "Titan/Metall";
 
   updateUI();
-  setCommentary(`Maydonda: ${p1.name} (${p1.priceUzs}) va ${p2.name} (${p2.priceUzs})! Urganch kiber to'yxonasiday shovqin, boshla og'a!`);
+  setCommentary(`Maydonda: ${p1.name} (${p1.priceUzs}) va ${p2.name} (${p2.priceUzs})! Urganch to'yxonasidek qizg'in, boshla og'a!`);
 }
 
 function updateUI() {
@@ -348,7 +389,13 @@ function updateUI() {
   document.getElementById("turn-indicator").innerText = `Navbat: ${currentTurn === 1 ? p1.name : p2.name}`;
 
   const currentAttacker = currentTurn === 1 ? p1 : p2;
-  document.getElementById("btn-ulta").disabled = currentAttacker.energy < 100;
+  const btnUlta = document.getElementById("btn-ulta");
+  if (btnUlta) btnUlta.disabled = currentAttacker.energy < 100;
+}
+
+function setCommentary(msg) {
+  const el = document.getElementById("commentary-text");
+  if (el) el.innerHTML = msg;
 }
 
 function doAction(type) {
@@ -449,5 +496,3 @@ function rand(min, max) {
 function getRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-
-init();
