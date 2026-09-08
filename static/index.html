@@ -3,62 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TELEFON-JANG | Urganch Kiber-Bozori</title>
+  <title>TELEFON-JANG | Urganch Dehqon Bozori Kiber Arenasi</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Xorazmcha Kiber Fon bezaklari -->
   <div class="bg-khiva-pattern"></div>
   <div class="bg-glow"></div>
   
   <header class="app-header">
     <div class="header-top">
-      <span class="badge">🏛️ URGANCH - DEHQON BOZORI KIBER ARENASI</span>
-      <span class="live-rate" id="usd-rate-badge">Dollar kursi: Yuklanmoqda...</span>
+      <span class="badge">🏛️ URGANCH - DEHQON BOZORI KIBER-ARENASI</span>
+      <span class="live-rate" id="usd-rate-badge">1$ = ... so'm</span>
     </div>
     <h1>TELEFON-JANG</h1>
-    <p class="subtitle">Apparatlarni so'mda bahola, xarakteristikasini solishtir va qaysi zo'rligini bil, og'a!</p>
+    <p class="subtitle">Apparatlarni so'mda bahola, to'liq pasportini o'qi va qaysi biri zo'rligini bil, og'a!</p>
   </header>
 
   <main class="container">
-    <!-- 1-BOSQICH: IKKITA APPARATNI SAYLASH -->
+    <!-- 1-BOSQICH: SAYLASH VA SOLISHTIRISH -->
     <section id="selection-phase" class="card">
       <div class="selection-slots">
         <div class="slot-card active-slot" id="slot-p1" onclick="setPickingSlot(1)">
-          <span class="slot-badge">1-APPARAT (SIZNING TANLOV)</span>
-          <h3 id="slot-name-p1">Apparat saylang...</h3>
+          <span class="slot-badge">1-APPARAT (SENING SAYLOVING)</span>
+          <h3 id="slot-name-p1">1-Apparatni saylang...</h3>
           <p id="slot-specs-p1" class="slot-sub">Ro'yxatdan birontasini bosing</p>
           <div id="slot-price-p1" class="slot-price-tag">0 so'm</div>
+          <div class="slot-actions">
+            <button class="btn-micro" id="btn-view-p1" onclick="event.stopPropagation(); openFullPassport(p1)" style="display:none;">📋 To'liq pasportini ko'rish</button>
+          </div>
         </div>
 
         <div class="slot-vs">
           <span>VS</span>
-          <button id="btn-compare-now" class="btn btn-compare" disabled>SOLISHTIRISH ⚖️</button>
+          <button id="btn-compare-now" class="btn btn-compare" disabled>KATTA TAHLIL ⚖️</button>
         </div>
 
         <div class="slot-card" id="slot-p2" onclick="setPickingSlot(2)">
-          <span class="slot-badge">2-APPARAT (RAQIB)</span>
-          <h3 id="slot-name-p2">Raqib apparatni saylang...</h3>
+          <span class="slot-badge">2-APPARAT (RAQIB APPARAT)</span>
+          <h3 id="slot-name-p2">2-Apparatni saylang...</h3>
           <p id="slot-specs-p2" class="slot-sub">Ro'yxatdan birontasini bosing</p>
           <div id="slot-price-p2" class="slot-price-tag">0 so'm</div>
+          <div class="slot-actions">
+            <button class="btn-micro" id="btn-view-p2" onclick="event.stopPropagation(); openFullPassport(p2)" style="display:none;">📋 To'liq pasportini ko'rish</button>
+          </div>
         </div>
       </div>
 
       <!-- SOLISHTIRUV NATIJASI (QAYSI BIRI ZO'R?) -->
       <div id="comparison-box" class="comparison-box hidden">
         <div class="comp-head">
-          <h4>⚖️ APPARATLAR SOLISHTIRUVI: QAYSI BIRI ZO'R?</h4>
-          <span id="verdict-tag" class="verdict-pill">Xulosa</span>
+          <h4>⚖️ URGANCH BOZORI XULOSASI: QAYSI APPARAT ZO'R?</h4>
+          <span id="verdict-tag" class="verdict-pill">Tahlil</span>
         </div>
         <div class="comp-grid" id="comp-details"></div>
       </div>
 
       <!-- Qidiruv va Filter -->
       <div class="filter-bar">
-        <input type="text" id="search-box" placeholder="🔍 Model, protsessor yoki so'm/dollar bo'yicha izlash..." autocomplete="off">
+        <input type="text" id="search-box" placeholder="🔍 Model nomi, chipset, xotira yoki so'm narxi bilan izlash (masalan: 17 Pro, 16 million, Titan)..." autocomplete="off">
         <div class="brand-chips" id="brand-filters">
           <button class="chip-btn active" data-brand="all">Barchasi</button>
           <button class="chip-btn" data-brand="Apple">Apple</button>
@@ -75,15 +80,15 @@
 
       <div class="start-bar">
         <div id="selected-summary">1-apparat uchun modelni bosing!</div>
-        <button id="btn-fight-start" class="btn btn-primary" disabled>MAYDONDA URISHTIRISH 🔥</button>
+        <button id="btn-fight-start" class="btn btn-primary" disabled>MAYDONDA URISHTIRISH (JANG) 🔥</button>
       </div>
     </section>
 
     <!-- 2-BOSQICH: JANG ARENASI -->
     <section id="battle-phase" class="card hidden">
       <div class="arena-header">
-        <div class="turn-indicator" id="turn-indicator">Harakat: 1-Ishtirokchida</div>
-        <button id="btn-change-phone" class="btn-link">← Qaytadan apparat saylash</button>
+        <div class="turn-indicator" id="turn-indicator">Navbat: 1-Ishtirokchida</div>
+        <button id="btn-change-phone" class="btn-link">← Boshqa apparat saylash</button>
       </div>
 
       <div class="battlefield">
@@ -97,7 +102,7 @@
           <div class="chip-badge" id="p1-chip">-</div>
           
           <div class="stat-wrapper">
-            <div class="stat-info"><span>🔋 Zaryad:</span><span id="p1-hp-text">0/0</span></div>
+            <div class="stat-info"><span>🔋 Zaryad (HP):</span><span id="p1-hp-text">0/0</span></div>
             <div class="stat-track"><div id="p1-hp-bar" class="stat-fill hp-p1"></div></div>
           </div>
 
@@ -114,6 +119,7 @@
             <div class="spec-cell"><span>📺 Ekran:</span><b id="p1-screen">-</b></div>
             <div class="spec-cell"><span>📷 Kamera:</span><b id="p1-camera">-</b></div>
             <div class="spec-cell"><span>🌡 Harorat:</span><b id="p1-temp">36°C</b></div>
+            <div class="spec-cell"><span>🏗 Material:</span><b id="p1-mat">-</b></div>
           </div>
         </div>
 
@@ -127,7 +133,7 @@
           <div class="chip-badge" id="p2-chip">-</div>
           
           <div class="stat-wrapper">
-            <div class="stat-info"><span>🔋 Zaryad:</span><span id="p2-hp-text">0/0</span></div>
+            <div class="stat-info"><span>🔋 Zaryad (HP):</span><span id="p2-hp-text">0/0</span></div>
             <div class="stat-track"><div id="p2-hp-bar" class="stat-fill hp-p2"></div></div>
           </div>
 
@@ -144,27 +150,94 @@
             <div class="spec-cell"><span>📺 Ekran:</span><b id="p2-screen">-</b></div>
             <div class="spec-cell"><span>📷 Kamera:</span><b id="p2-camera">-</b></div>
             <div class="spec-cell"><span>🌡 Harorat:</span><b id="p2-temp">36°C</b></div>
+            <div class="spec-cell"><span>🏗 Material:</span><b id="p2-mat">-</b></div>
           </div>
         </div>
       </div>
 
-      <!-- Jang harakatlari -->
+      <!-- Taktik Harakatlar -->
       <div class="actions-panel">
         <button id="btn-attack" class="btn btn-attack">💥 GULLATIB URISH</button>
-        <button id="btn-crit" class="btn btn-crit">🚀 OVERCLOCK BENCHMARK</button>
+        <button id="btn-crit" class="btn btn-crit">🚀 OVERCLOCK (Kuchli zarb)</button>
         <button id="btn-cool" class="btn btn-cool">❄️ KULER QO'YISH (Sovutish)</button>
         <button id="btn-charge" class="btn btn-charge">🔌 PAYNETDAN PUL SOLISH (+HP)</button>
         <button id="btn-ulta" class="btn btn-ulta" disabled>🔥 TARAS-QARS ULTA (100%)</button>
       </div>
 
       <div class="commentary-box">
-        <div class="commentary-header">Maydon diktori:</div>
+        <div class="commentary-header">Arena ovozi:</div>
         <p id="commentary-text">Maydon qizimoqda! 1-apparat, zarbani boshla og'a!</p>
       </div>
     </section>
   </main>
 
-  <!-- G'ALABA VA MAG'LUBIYATNING ILMIY TAHLILI -->
+  <!-- KATTA PASPORT (TELEFON HAQIDA TO'LIQ MA'LUMOT SAHIFASI) -->
+  <div id="modal-passport" class="modal-overlay hidden">
+    <div class="modal-passport-box">
+      <div class="passport-header">
+        <div>
+          <span class="passport-tag" id="pass-brand">Brend</span>
+          <h2 id="pass-title">Telefon Nomi</h2>
+          <div class="pass-prices">
+            <span class="pass-usd" id="pass-usd">$0</span>
+            <span class="pass-uzs" id="pass-uzs">0 so'm</span>
+          </div>
+        </div>
+        <button class="modal-close-x" onclick="closePassport()">&times;</button>
+      </div>
+
+      <div class="passport-scroll-body">
+        <!-- Bozor Usta Xulosasi (Xorazmcha) -->
+        <div class="vibe-banner">
+          <div class="vibe-title">🏛️ URGANCH BOZORI USTALARI XULOSASI:</div>
+          <p id="pass-vibe" class="vibe-content">-</p>
+        </div>
+
+        <!-- 8 ta bo'limdan iborat to'liq ilmiy jadval -->
+        <div class="passport-grid">
+          <div class="pass-card">
+            <h4>⚙️ Protsessor va Grafika</h4>
+            <p id="pass-chip">-</p>
+          </div>
+          <div class="pass-card">
+            <h4>💾 Xotira & Tezkor Xotira (RAM)</h4>
+            <p id="pass-ram-storage">-</p>
+          </div>
+          <div class="pass-card">
+            <h4>📺 Displey va Ko'z Himoyasi</h4>
+            <p id="pass-screen">-</p>
+          </div>
+          <div class="pass-card">
+            <h4>📷 Kameralar Majmuasi</h4>
+            <p id="pass-camera">-</p>
+          </div>
+          <div class="pass-card">
+            <h4>🔋 Akkumulyator & Zaryadlash</h4>
+            <p id="pass-battery">-</p>
+          </div>
+          <div class="pass-card">
+            <h4>🏗 Korpus, Material & Suvdan Himoya</h4>
+            <p id="pass-materials">-</p>
+          </div>
+          <div class="pass-card">
+            <h4>⚖️ Vazni & Gabarit O'lchami</h4>
+            <p id="pass-dimensions">-</p>
+          </div>
+          <div class="pass-card">
+            <h4>🛡 Jangona Ko'rsatkichlar</h4>
+            <p id="pass-combat-stats">-</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="passport-footer">
+        <button class="btn btn-secondary" onclick="closePassport()">YOPISH ✖</button>
+        <button class="btn btn-primary" id="btn-pick-from-modal">SHU APPARATNI SAYLASH ✅</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- G'ALABA TAHLIL MODALI -->
   <div id="modal-verdict" class="modal-overlay hidden">
     <div class="modal-content">
       <div class="verdict-header">
@@ -173,7 +246,7 @@
         <span class="verdict-score" id="verdict-vs-text">-</span>
       </div>
       <div class="verdict-body">
-        <h4 class="verdict-subtitle">NIMA SABABDAN YUTDI? (TAHLIL)</h4>
+        <h4 class="verdict-subtitle">NIMA SABABDAN YUTDI? (TEXNIK TAHLIL)</h4>
         <ul id="verdict-reasons" class="verdict-list"></ul>
       </div>
       <div class="verdict-footer">
